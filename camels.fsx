@@ -1,3 +1,4 @@
+
 type Camel =
 | Yellow
 | Blue
@@ -5,12 +6,12 @@ type Camel =
 | Green
 | White
 
-type Tile =
+type Tile = 
 | Oasis
 | Mirage
 
 let allCamels = [Yellow; Blue; Red; Green; White]
-type Position = int
+let allCamelsSet = [Yellow; Blue; Red; Green; White] |> Set.ofList
 
 type Field =
 | Tile of Tile
@@ -23,7 +24,7 @@ type DiceRoll = {
     Camel: Camel
 }
 
-let rollCombinations camelsLeft = 
+let allRollCombinations camelsLeft = 
     let rec rollCombinations 
         (acc : DiceRoll list) 
         (possibleCamels: Camel List) 
@@ -45,10 +46,29 @@ let rollCombinations camelsLeft =
         }
     rollCombinations [] camelsLeft
 
-let setElement key s = 
-    Array.map (fun (k, v) -> if k = key then (k, s) else (k, v))
+
+let random = System.Random()
+
+//TODO: maybe it should return seq<DiceRoll> instead of Seq<DiceRoll list>
+let infiniteSimulatedRolls =
+    let rec infiniteSimulatedRolls (acc : DiceRoll list) (remainingCamels : Camel Set) = seq {
+        match remainingCamels with
+        | empty when empty.IsEmpty -> 
+            yield acc
+            yield! infiniteSimulatedRolls [] allCamelsSet
+        | remainingCamels -> 
+            let randomCamelIndex = random.Next(remainingCamels |> Set.count)
+            let randomCamel = (remainingCamels |> Set.toList).[randomCamelIndex] // TODO: optimize
+            let count = random.Next(1,4);
+            let roll = {Camel = randomCamel; Count = count}
+            yield! infiniteSimulatedRolls (roll::acc) (remainingCamels |> Set.remove randomCamel)
+    }
+    infiniteSimulatedRolls [] allCamelsSet
 
 
+
+let setElement key newEl = 
+    Array.mapi (fun k v -> if k = key then newEl else v)
 
 let applyRoll (map : Map) (roll : DiceRoll) : Map =
     let {Count = rollNumber; Camel = camel} = roll
@@ -84,10 +104,8 @@ let applyRoll (map : Map) (roll : DiceRoll) : Map =
 
     let mapWithRemovedCamels = 
                map     
-               |> Array.indexed
                |> setElement camelMapIndex 
                     fieldToLeave
-               |> Array.map snd
 
     // printfn "map: %A" mapWithRemovedCamels
 
@@ -107,14 +125,10 @@ let applyRoll (map : Map) (roll : DiceRoll) : Map =
             | Some (CamelStack camels) -> 
                 let newCamelStack =  camelsToMove @ camels
                 mapWithRemovedCamels 
-                |> Array.indexed 
                 |> setElement newCamelMapIndex (Some (CamelStack newCamelStack))
-                |> Array.map snd
             | None -> 
                 mapWithRemovedCamels 
-                |> Array.indexed 
                 |> setElement newCamelMapIndex (Some (CamelStack camelsToMove))
-                |> Array.map snd
     // printfn "map at end: %A" map
     // printfn "" 
     map        
@@ -127,6 +141,8 @@ let winner (map : Map) : Camel =
             | Some (CamelStack _) -> true
             | _ -> false) 
     lastNonEmptyStack |> List.head
+    
+
 
 
 let playGame = List.fold applyRoll
@@ -137,36 +153,37 @@ let initialState : Map =
         | 0 -> CamelStack allCamels |> Some
         | _ -> None)
 
+let winnerPercentages totalGames = 
+    List.map (fun (camel, gamesWon) -> 
+        (camel, (float gamesWon) / (float totalGames))
+    )
+    >> List.sortByDescending snd
 
 let winnerCounts = 
-    rollCombinations allCamels
+    allRollCombinations allCamels
     |> Seq.map (playGame initialState)
     |> Seq.map winner
     |> Seq.countBy id
     |> Seq.toList
 
-let totalGames = 
-    winnerCounts 
-    |> List.sumBy snd
+winnerCounts
+|> winnerPercentages (winnerCounts |> List.sumBy snd)
 
-let winnerPercentages =
-    winnerCounts
-    |> List.map (fun (camel, gamesWon) -> 
-        (camel, (float gamesWon) / (float totalGames))
-    )
+let randomSimulatedWinnerCounts =
+    infiniteSimulatedRolls
+    |> Seq.take 10_000_000
+    |> Seq.map (playGame initialState)
+    |> Seq.map winner
+    |> Seq.countBy id
+    |> Seq.toList
 
-allCamels
+randomSimulatedWinnerCounts
+|> winnerPercentages 10_000_000
 
-allCamels
-totalGames
-winnerCounts 
-|> List.sortByDescending snd
+infiniteSimulatedRolls
+|> Seq.take 1_000_000
+|> Seq.countBy (fun x -> x |> List.head |> fun x -> x.Count)
 
-winnerPercentages
-|> List.sortByDescending snd
-
-// rollCombinations allCamels
-// |> Seq.length
 
 //TODO: sequence length = 16
 // rollCombinations allCamels
