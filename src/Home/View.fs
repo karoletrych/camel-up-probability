@@ -130,6 +130,10 @@ let field fieldIndex =
                   CSSProp.StrokeWidth "1"
                   CSSProp.Stroke "#000000"
                   CSSProp.Position "absolute"
+                  Display "flex"
+                  AlignItems "flex-end"
+                  JustifyContent "center"
+                  Border "2px solid black"
               ]
 
             //  
