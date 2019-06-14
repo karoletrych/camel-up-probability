@@ -15,8 +15,6 @@ let winner (map : Map) : Camel =
     lastNonEmptyStack |> List.head
     
 
-
-
 let playGame = List.fold applyRoll
 
 let initialState : Map = 

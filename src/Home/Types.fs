@@ -1,14 +1,20 @@
+module Home.Types
+
+type Model = string
+
+type Msg =
+    | ChangeStr of string
+
 type Camel =
 | Yellow
 | Blue
-| Red
+| Orange
 | Green
 | White
 
 type Tile = 
 | Oasis
 | Mirage
-
 
 type Field =
 | Tile of Tile
