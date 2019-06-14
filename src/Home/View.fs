@@ -92,6 +92,9 @@ open Fable.Import.React
 //     svg.addEventListener("mouseup", endDrag);
 //     svg.addEventListener("mouseleave", endDrag);
 
+let drag (ev : DragEvent) = 
+    ev.dataTransfer.setData("text", (ev.target :?> Element).id) |> ignore
+
 let camelStack (camels : Camel list) fieldIndex =
     let (x, y) = coordsMapping |> Map.find fieldIndex
     camels 
@@ -103,16 +106,14 @@ let camelStack (camels : Camel list) fieldIndex =
                 Style [
                     Width (sprintf "%d%%"(camelWidth))
                     Height (sprintf "%d%%"(camelHeight))
+                    Left (sprintf "%d%%"(x * fieldSideHorizontal))
+                    Top (sprintf "%d%%"((y+1) * fieldSideVertical - (camelIndex + 1) * camelHeight))
+                    BackgroundColor (camelColor camel)
+                    CSSProp.Position "absolute"
+                    Border "1px solid black"
                     ]
-                // SVG.Width (sprintf "%d%%"(camelWidth))
-                // SVG.Height (sprintf "%d%%"(camelHeight))
-                // SVG.X (sprintf "%d%%"(x * fieldSideHorizontal))
-                // SVG.Y (sprintf "%d%%"((y+1) * fieldSideVertical - (camelIndex + 1) * camelHeight))
-                // SVG.Fill (camelColor camel)
-                // SVG.StrokeWidth "0.1"
-                // SVG.Stroke "#000000"
-                Class "camel-stack draggable"
-                Style [Cursor "move"]
+                Draggable true
+                OnDragStart drag
               ] []
         ])
 
@@ -135,25 +136,9 @@ let field fieldIndex =
                   JustifyContent "center"
                   Border "2px solid black"
               ]
-
-            //  
-            // SVG.Width (sprintf "%d%%"(fieldSideHorizontal))
-            // SVG.Height (sprintf "%d%%"(fieldSideVertical))
-            // SVG.X (sprintf "%d%%"(x*fieldSideHorizontal))
-            // SVG.Y (sprintf "%d%%"(y*fieldSideVertical))
-            // SVG.Fill "#F0E68C"
-            // SVG.StrokeWidth "1"
-            // SVG.Stroke "#000000"
-
-            //  SVG.X (sprintf "%d%%"(x*fieldSideHorizontal + fieldSideHorizontal/2))
-            // SVG.Y (sprintf "%d%%"(y*fieldSideVertical + fieldSideVertical/2))
-            // SVG.FontSize "8"
-            // Style [DominantBaseline "central"]
-            // SVG.TextAnchor "middle"
           ] 
           [Fable.Helpers.React.HTMLNode.Text (string (i+1))]
-
-            ]
+        ]
 
     let coord = coordsMapping |> Map.find fieldIndex
     field (coord, fieldIndex)
@@ -168,14 +153,14 @@ let root model dispatch =
   ]
    (
    ( [0..15] |> List.collect field) 
-//    @ 
-//    (camelStack [
-//        Camel.Blue; 
-//        Camel.Yellow;
-//        Camel.Orange;
-//        Camel.Green;
-//        Camel.White;
-//        ] 0 |> List.collect id)
+   @ 
+   (camelStack [
+       Camel.Blue; 
+       Camel.Yellow;
+       Camel.Orange;
+       Camel.Green;
+       Camel.White;
+       ] 0 |> List.collect id)
        )
        
     
