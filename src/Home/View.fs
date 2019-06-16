@@ -5,11 +5,12 @@ open Fable.Core.JsInterop
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Types
+open Fable.Import
 
 open System
 open Elmish
 open Elmish.React
-open Fable.Import.React
+open Types
 type SVG = SVGAttr
 
 let fieldSideHorizontal = 100 / 5
@@ -46,63 +47,47 @@ let camelColor = function
 | Camel.White -> "white"
 | Camel.Yellow -> "yellow"
 
-open Fable.Import.Browser
-open Fable.Import
+let camelFromId id = 
+  match id with
+  | "camel-blue" -> Camel.Blue
+  | "camel-orange" -> Camel.Orange
+  | "camel-green" -> Camel.Green
+  | "camel-white" -> Camel.White
+  | "camel-yellow" -> Camel.Yellow
+  | _ -> failwith (sprintf "invalid camel id: %s" id)
+
+
+
+
 open Fable.Import.React
 
+let allowDrop(ev : DragEvent) = 
+  ev.preventDefault()
 
-// let makeDraggable (svg : Element) = 
-//     let mutable dragged = null : Element
-//     let mutable offset = None : (float* float) option
 
-//     let getMousePosition (evt : MouseEvent) =
-//       let svg = svg :?> SVGLocatable
-//       let CTM = svg.getScreenCTM();
-//       (
-//         ((evt.clientX - CTM.e) / CTM.a),
-//         ((evt.clientY - CTM.f) / CTM.d)
-//       )
-
-//     let startDrag = U2.Case1 (fun (evt : Event) -> 
-//         let target = evt.target :?> Element
-//         if (target).classList.contains "draggable"
-//         then 
-//             dragged <- target 
-//             let (offsetx1, offsety1) = getMousePosition (evt :?> MouseEvent);
-//             let (draggedPosXPercents, draggedPosYPercents) = 
-//                 (JS.parseFloat (dragged.getAttribute("x"))), 
-//                 (JS.parseFloat (dragged.getAttribute("y")))
-//             let (draggedPosX, draggedPosY) = ((draggedPosXPercents/100.) * boardWidth,  (draggedPosYPercents/100.) * boardHeight)
-//             let (offsetx2, ofssety2) = (offsetx1 - draggedPosX), (offsety1 - draggedPosY)
-//             offset <- Some (offsetx2, ofssety2)
-
-//     )
-//     let drag = !^(fun (evt : Event) -> 
-//       if dragged <> null then
-//         evt.preventDefault();
-//         let coordx, coordy = getMousePosition((evt :?> MouseEvent));
-//         dragged.setAttribute("x", string (coordx - fst offset.Value));
-//         dragged.setAttribute("y", string (coordy - snd offset.Value));
-//     )
-//     let endDrag = !^(fun evt -> 
-//         dragged <- null)
-
-//     svg.addEventListener("mousedown", startDrag);
-//     svg.addEventListener("mousemove", drag);
-//     svg.addEventListener("mouseup", endDrag);
-//     svg.addEventListener("mouseleave", endDrag);
-
-let drag (ev : DragEvent) = 
-    ev.dataTransfer.setData("text", (ev.target :?> Element).id) |> ignore
-
-let camelStack (camels : Camel list) fieldIndex =
+let camelStack (camels : Camel list) fieldIndex dispatch =
     let (x, y) = coordsMapping |> Map.find fieldIndex
+    
+    let dragStart (ev : DragEvent) = 
+      let id = (ev.target :?> Fable.Import.Browser.Element).id
+      ev.dataTransfer.setData("text", id) |> ignore
+
+    let drop(ev : DragEvent) = 
+      ev.preventDefault()
+      JS.debugger ()
+      let targetCamelElement = (ev.target :?> Fable.Import.Browser.Element)
+      let targetCamel = camelFromId targetCamelElement.id
+      let camelId = ev.dataTransfer.getData("text")
+      let camel = camelFromId camelId
+      (CamelDropped (camel, fieldIndex)) |> dispatch
+
     camels 
     |> List.rev
     |> List.mapi (
         fun camelIndex camel ->
         [div
               [ 
+                Id (sprintf "camel-%s" (camel.ToString().ToLower() ))
                 Style [
                     Width (sprintf "%d%%"(camelWidth))
                     Height (sprintf "%d%%"(camelHeight))
@@ -111,17 +96,29 @@ let camelStack (camels : Camel list) fieldIndex =
                     BackgroundColor (camelColor camel)
                     CSSProp.Position "absolute"
                     Border "1px solid black"
+                    Cursor "pointer"
                     ]
                 Draggable true
-                OnDragStart drag
+                OnDragStart dragStart
+                OnDragOver allowDrop
+                OnDrop drop
               ] []
         ])
 
+let field dispatch fieldIndex  =
+    let drop(ev : DragEvent) = 
+      ev.preventDefault()
+      let target = (ev.target :?> Fable.Import.Browser.Element)
+      let fieldIndex = int (System.Text.RegularExpressions.Regex.Match(target.id, @"\d+").Value);
+      let camelId = ev.dataTransfer.getData("text")
+      let camel = camelFromId camelId
+      (CamelDropped (camel, fieldIndex)) |> dispatch
 
-let field fieldIndex =
+
     let field ((x,y),i) =
         [div
           [ 
+              Id (sprintf "field-%d" i)
               Style [
                   Width (sprintf "%d%%"(fieldSideHorizontal))
                   Height (sprintf "%d%%"(fieldSideVertical))
@@ -136,6 +133,8 @@ let field fieldIndex =
                   JustifyContent "center"
                   Border "2px solid black"
               ]
+              OnDrop drop
+              OnDragOver allowDrop
           ] 
           [Fable.Helpers.React.HTMLNode.Text (string (i+1))]
         ]
@@ -143,7 +142,7 @@ let field fieldIndex =
     let coord = coordsMapping |> Map.find fieldIndex
     field (coord, fieldIndex)
 
-let root model dispatch =
+let root model (dispatch : Msg -> unit) =
   div [ 
       Style [
           Width "500px"
@@ -152,7 +151,7 @@ let root model dispatch =
           ]
   ]
    (
-   ( [0..15] |> List.collect field) 
+   ( [0..15] |> List.collect (field dispatch)) 
    @ 
    (camelStack [
        Camel.Blue; 
@@ -160,7 +159,7 @@ let root model dispatch =
        Camel.Orange;
        Camel.Green;
        Camel.White;
-       ] 0 |> List.collect id)
+       ] 0 dispatch |> List.collect id)
        )
        
     

@@ -33,7 +33,6 @@ let menu currentPage =
       ul
         [ ClassName "menu-list" ]
         [ menuItem "Home" Home currentPage
-          menuItem "Counter sample" Counter currentPage
           menuItem "About" Page.About currentPage ] ]
 
 let root model dispatch =
@@ -41,11 +40,10 @@ let root model dispatch =
   let pageHtml page =
     match page with
     | Page.About -> Info.View.root
-    | Counter -> Counter.View.root model.Counter (CounterMsg >> dispatch)
     | Home -> Home.View.root model.Home (HomeMsg >> dispatch)
 
   div
-    [OnLoad (fun x -> printfn "AAAAAAAA")]
+    []
     [ Navbar.View.root
       div
         [ ClassName "section" ]
