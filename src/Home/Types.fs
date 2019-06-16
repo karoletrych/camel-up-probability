@@ -17,6 +17,9 @@ type Field =
 
 type Model = Field option array
 
-type Msg =
-    | CamelDropped of Camel * int
+type DropPlace =
+    | OnTopOfCamel of Camel
+    | OnField of int
 
+type Msg =
+    | CamelDropped of Camel * DropPlace

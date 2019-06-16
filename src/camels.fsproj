@@ -8,6 +8,7 @@
     <!-- Info -->
     <Compile Include="Info/View.fs" />
     <!-- Home -->
+    <Compile Include="Home/Common.fs" />
     <Compile Include="Home/Types.fs" />
     <Compile Include="Home/State.fs" />
     <Compile Include="Home/View.fs" />

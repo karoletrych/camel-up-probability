@@ -1,16 +1,9 @@
 module Home.View
 
-open Fable.Core
-open Fable.Core.JsInterop
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Types
-open Fable.Import
 
-open System
-open Elmish
-open Elmish.React
-open Types
 type SVG = SVGAttr
 
 let fieldSideHorizontal = 100 / 5
@@ -56,16 +49,13 @@ let camelFromId id =
   | "camel-yellow" -> Camel.Yellow
   | _ -> failwith (sprintf "invalid camel id: %s" id)
 
-
-
-
 open Fable.Import.React
 
 let allowDrop(ev : DragEvent) = 
   ev.preventDefault()
 
 
-let camelStack (camels : Camel list) fieldIndex dispatch =
+let camelStack dispatch (camels : Camel list) fieldIndex =
     let (x, y) = coordsMapping |> Map.find fieldIndex
     
     let dragStart (ev : DragEvent) = 
@@ -74,12 +64,11 @@ let camelStack (camels : Camel list) fieldIndex dispatch =
 
     let drop(ev : DragEvent) = 
       ev.preventDefault()
-      JS.debugger ()
       let targetCamelElement = (ev.target :?> Fable.Import.Browser.Element)
       let targetCamel = camelFromId targetCamelElement.id
       let camelId = ev.dataTransfer.getData("text")
       let camel = camelFromId camelId
-      (CamelDropped (camel, fieldIndex)) |> dispatch
+      CamelDropped (camel, OnTopOfCamel (targetCamel)) |> dispatch
 
     camels 
     |> List.rev
@@ -112,8 +101,7 @@ let field dispatch fieldIndex  =
       let fieldIndex = int (System.Text.RegularExpressions.Regex.Match(target.id, @"\d+").Value);
       let camelId = ev.dataTransfer.getData("text")
       let camel = camelFromId camelId
-      (CamelDropped (camel, fieldIndex)) |> dispatch
-
+      CamelDropped (camel, OnField (fieldIndex)) |> dispatch
 
     let field ((x,y),i) =
         [div
@@ -151,18 +139,23 @@ let root model (dispatch : Msg -> unit) =
           ]
   ]
    (
+     let camelsIndexed = 
+         model 
+         |> Array.toList
+         |> List.indexed
+         |> List.choose (
+                  function
+                  | (i, Some (CamelStack stack)) -> Some (i, stack)
+                  | _ -> None
+                  )
+     let renderedCamels = 
+        camelsIndexed
+        |> List.collect (fun (i, camels) -> camelStack dispatch camels i)
+        |> List.collect id
    ( [0..15] |> List.collect (field dispatch)) 
    @ 
-   (camelStack [
-       Camel.Blue; 
-       Camel.Yellow;
-       Camel.Orange;
-       Camel.Green;
-       Camel.White;
-       ] 0 dispatch |> List.collect id)
+   (renderedCamels)
        )
-       
-    
 
 // let setup () = 
 //     let elements = document.getElementsByClassName("camel-stack")

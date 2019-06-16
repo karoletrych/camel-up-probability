@@ -2,8 +2,6 @@ let allCamels = [Yellow; Blue; Red; Green; White]
 let allCamelsSet = [Yellow; Blue; Red; Green; White] |> Set.ofList
 
 
-let setElement key newEl = 
-    Array.mapi (fun k v -> if k = key then newEl else v)
 
 let winner (map : Map) : Camel = 
     let (Some (CamelStack lastNonEmptyStack)) =
