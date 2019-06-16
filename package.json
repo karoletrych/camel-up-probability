@@ -2,13 +2,18 @@
   "name": "camels",
   "version": "1.0.0",
   "description": "Simple Fable App",
+  "homepage": "https://karoletrych.github.io/camel-up-probability",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm install && npx webpack",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d deploy"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "gh-pages": "^2.0.1",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "remotedev": "^0.2.7"
