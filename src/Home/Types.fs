@@ -11,11 +11,22 @@ type Tile =
 | Oasis
 | Mirage
 
+type DiceRoll = {
+    Count : int
+    Camel : Camel
+}
+
 type Field =
 | Tile of Tile
 | CamelStack of Camel list
 
-type Model = Field option array
+type Map = Field option array
+
+type Model = {
+    Map : Map
+    DicesLeft : Camel list
+    StageWinChances : ((Camel * float) list) option
+}
 
 type DropPlace =
     | OnTopOfCamel of Camel

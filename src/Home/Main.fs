@@ -1,5 +1,8 @@
-let allCamels = [Yellow; Blue; Red; Green; White]
-let allCamelsSet = [Yellow; Blue; Red; Green; White] |> Set.ofList
+module Home.Main
+open Home.Types
+
+
+let allCamels = [Yellow; Blue; Orange; Green; White]
 
 
 
@@ -13,7 +16,7 @@ let winner (map : Map) : Camel =
     lastNonEmptyStack |> List.head
     
 
-let playGame = List.fold applyRoll
+let playGame = List.fold MoveCamel.applyRoll
 
 let initialState : Map = 
     Array.init 16
@@ -27,33 +30,35 @@ let winnerPercentages totalGames =
     )
     >> List.sortByDescending snd
 
-allRollCombinations allCamels
-|> Seq.length
-
-let winnerCounts = 
-    allRollCombinations allCamels
-    |> Seq.map (playGame initialState)
+let winnerCounts map camelsLeft = 
+    RollSequences.allRollCombinations camelsLeft
+    |> Seq.map (playGame map)
     |> Seq.map winner
     |> Seq.countBy id
     |> Seq.toList
 
-winnerCounts
-|> winnerPercentages (winnerCounts |> List.sumBy snd)
+let stageWinChances map camelsLeft =
+  let winnerCounts = winnerCounts map camelsLeft
+  let totalGames = winnerCounts |> List.sumBy snd
+  winnerPercentages totalGames winnerCounts
 
-let randomSimulatedWinnerCounts =
-    infiniteSimulatedRolls
-    |> Seq.take 10_000_000
-    |> Seq.map (playGame initialState)
-    |> Seq.map winner
-    |> Seq.countBy id
-    |> Seq.toList
 
-randomSimulatedWinnerCounts
-|> winnerPercentages 10_000_000
 
-infiniteSimulatedRolls
-|> Seq.take 1_000_000
-|> Seq.countBy (fun x -> x |> List.head |> fun x -> x.Count)
+
+// let randomSimulatedWinnerCounts =
+//     RollSequences.infiniteSimulatedRolls
+//     |> Seq.take 10_000_000
+//     |> Seq.map (playGame initialState)
+//     |> Seq.map winner
+//     |> Seq.countBy id
+//     |> Seq.toList
+
+// randomSimulatedWinnerCounts
+// |> winnerPercentages 10_000_000
+
+// RollSequences.infiniteSimulatedRolls
+// |> Seq.take 1_000_000
+// |> Seq.countBy (fun x -> x |> List.head |> fun x -> x.Count)
 
 
 //TODO: sequence length = 16

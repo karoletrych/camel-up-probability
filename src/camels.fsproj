@@ -10,6 +10,9 @@
     <!-- Home -->
     <Compile Include="Home/Common.fs" />
     <Compile Include="Home/Types.fs" />
+    <Compile Include="Home/RollSequences.fs" />
+    <Compile Include="Home/MoveCamel.fs" />
+    <Compile Include="Home/Main.fs" />
     <Compile Include="Home/State.fs" />
     <Compile Include="Home/View.fs" />
     <!-- Navbar -->

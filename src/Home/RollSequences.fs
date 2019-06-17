@@ -1,3 +1,9 @@
+module Home.RollSequences
+open Home.Types
+
+let allCamelsSet = [Yellow; Blue; Orange; Green; White] |> Set.ofList
+
+
 let allRollCombinations camelsLeft = 
     let rec rollCombinations 
         (acc : DiceRoll list) 

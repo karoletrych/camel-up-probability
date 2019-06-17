@@ -1,3 +1,6 @@
+module Home.MoveCamel
+open Home.Types
+open Home.Common
 
 let applyRoll (map : Map) (roll : DiceRoll) : Map =
     let {Count = rollNumber; Camel = camel} = roll

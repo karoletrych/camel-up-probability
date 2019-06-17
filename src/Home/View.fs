@@ -130,7 +130,8 @@ let field dispatch fieldIndex  =
     let coord = coordsMapping |> Map.find fieldIndex
     field (coord, fieldIndex)
 
-let root model (dispatch : Msg -> unit) =
+
+let board model dispatch = 
   div [ 
       Style [
           Width "500px"
@@ -157,11 +158,23 @@ let root model (dispatch : Msg -> unit) =
    (renderedCamels)
        )
 
-// let setup () = 
-//     let elements = document.getElementsByClassName("camel-stack")
-//     printfn "%A" elements.length
-//     for i in [0..(int)elements.length-1] do
-        // let e = elements.item (float i)
-        // e.addEventListener("dragStart", drag)
+let stageWinChancesSummary (model : (Camel * float) list) = 
+  ul 
+    []
+    (
+      model
+      |> List.map (fun (c, f) -> 
+        let text = sprintf "%s: %f" (c.ToString()) f
+        li [] [ Fable.Helpers.React.HTMLNode.Text text]
+      )
+    )
+    
 
-// JS.setTimeout setup 100
+
+let root model (dispatch : Msg -> unit) =
+  div 
+    [Style [Display "flex"] ]
+    [
+      board model dispatch
+      stageWinChancesSummary []
+    ]
