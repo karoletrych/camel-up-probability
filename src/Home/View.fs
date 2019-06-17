@@ -31,7 +31,7 @@ let coordsMapping = Map.ofList [
     (12, (2,0));
     (13, (3,0));
     (14, (4,0));
-    (15, (4,1))] 
+    (15, (4,1))]
 
 let camelColor = function
 | Camel.Blue -> "blue"
@@ -40,7 +40,7 @@ let camelColor = function
 | Camel.White -> "white"
 | Camel.Yellow -> "yellow"
 
-let camelFromId id = 
+let camelFromId id =
   match id with
   | "camel-blue" -> Camel.Blue
   | "camel-orange" -> Camel.Orange
@@ -51,18 +51,18 @@ let camelFromId id =
 
 open Fable.Import.React
 
-let allowDrop(ev : DragEvent) = 
+let allowDrop(ev : DragEvent) =
   ev.preventDefault()
 
 
 let camelStack dispatch (camels : Camel list) fieldIndex =
     let (x, y) = coordsMapping |> Map.find fieldIndex
-    
-    let dragStart (ev : DragEvent) = 
+
+    let dragStart (ev : DragEvent) =
       let id = (ev.target :?> Fable.Import.Browser.Element).id
       ev.dataTransfer.setData("text", id) |> ignore
 
-    let drop(ev : DragEvent) = 
+    let drop(ev : DragEvent) =
       ev.preventDefault()
       let targetCamelElement = (ev.target :?> Fable.Import.Browser.Element)
       let targetCamel = camelFromId targetCamelElement.id
@@ -70,12 +70,12 @@ let camelStack dispatch (camels : Camel list) fieldIndex =
       let camel = camelFromId camelId
       CamelDropped (camel, OnTopOfCamel (targetCamel)) |> dispatch
 
-    camels 
+    camels
     |> List.rev
     |> List.mapi (
         fun camelIndex camel ->
         [div
-              [ 
+              [
                 Id (sprintf "camel-%s" (camel.ToString().ToLower() ))
                 Style [
                     Width (sprintf "%d%%"(camelWidth))
@@ -95,7 +95,7 @@ let camelStack dispatch (camels : Camel list) fieldIndex =
         ])
 
 let field dispatch fieldIndex  =
-    let drop(ev : DragEvent) = 
+    let drop(ev : DragEvent) =
       ev.preventDefault()
       let target = (ev.target :?> Fable.Import.Browser.Element)
       let fieldIndex = int (System.Text.RegularExpressions.Regex.Match(target.id, @"\d+").Value);
@@ -105,7 +105,7 @@ let field dispatch fieldIndex  =
 
     let field ((x,y),i) =
         [div
-          [ 
+          [
               Id (sprintf "field-%d" i)
               Style [
                   Width (sprintf "%d%%"(fieldSideHorizontal))
@@ -123,7 +123,7 @@ let field dispatch fieldIndex  =
               ]
               OnDrop drop
               OnDragOver allowDrop
-          ] 
+          ]
           [Fable.Helpers.React.HTMLNode.Text (string (i+1))]
         ]
 
@@ -131,8 +131,8 @@ let field dispatch fieldIndex  =
     field (coord, fieldIndex)
 
 
-let board model dispatch = 
-  div [ 
+let board model dispatch =
+  div [
       Style [
           Width "500px"
           Height "500px"
@@ -140,8 +140,8 @@ let board model dispatch =
           ]
   ]
    (
-     let camelsIndexed = 
-         model 
+     let camelsIndexed =
+         model
          |> Array.toList
          |> List.indexed
          |> List.choose (
@@ -149,32 +149,32 @@ let board model dispatch =
                   | (i, Some (CamelStack stack)) -> Some (i, stack)
                   | _ -> None
                   )
-     let renderedCamels = 
+     let renderedCamels =
         camelsIndexed
         |> List.collect (fun (i, camels) -> camelStack dispatch camels i)
         |> List.collect id
-   ( [0..15] |> List.collect (field dispatch)) 
-   @ 
+   ( [0..15] |> List.collect (field dispatch))
+   @
    (renderedCamels)
        )
 
-let stageWinChancesSummary (model : (Camel * float) list) = 
-  ul 
+let stageWinChancesSummary (model : (Camel * float) list) =
+  ul
     []
     (
       model
-      |> List.map (fun (c, f) -> 
+      |> List.map (fun (c, f) ->
         let text = sprintf "%s: %f" (c.ToString()) f
         li [] [ Fable.Helpers.React.HTMLNode.Text text]
       )
     )
-    
 
 
-let root model (dispatch : Msg -> unit) =
-  div 
+
+let root (model : Model) (dispatch : Msg -> unit) =
+  div
     [Style [Display "flex"] ]
     [
-      board model dispatch
+      board model.Map dispatch
       stageWinChancesSummary []
     ]

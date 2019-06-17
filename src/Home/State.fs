@@ -7,7 +7,7 @@ open Main
 
 let allCamels = [Yellow; Blue; Orange; Green; White]
 
-let initialMap : Map = 
+let initialMap : Map =
     Array.init 16
         (function
         | 0 -> CamelStack allCamels |> Some
@@ -25,9 +25,9 @@ let init () : Model * Cmd<Msg> =
 let findCamelStack camel model =
   model
   |> Array.indexed
-  |> Array.choose (fun f -> 
-                    match f with 
-                    | (i, Some (CamelStack stack)) -> 
+  |> Array.choose (fun f ->
+                    match f with
+                    | (i, Some (CamelStack stack)) ->
                       if stack |> List.contains camel then Some (i, stack) else None
                     | _ -> None)
   |> Array.head
@@ -51,7 +51,7 @@ let update msg model : Model * Cmd<Msg> =
                   oldStack
                   |> List.where (fun c -> c <> droppedCamel)
                   |> CamelStack |> Some
-              let updatedTargetStack = 
+              let updatedTargetStack =
                 targetStack
                 |> List.where (fun c -> c <> droppedCamel)
                 |> insertElement targetCamelPosition droppedCamel
@@ -59,8 +59,8 @@ let update msg model : Model * Cmd<Msg> =
               map
               |> setElement oldStackIndex updatedOldStack
               |> setElement targetStackIndex updatedTargetStack
-          newMap            
-        {model with 
+          newMap
+        {model with
           Map = newMap
           StageWinChances = calculateChances newMap |> Some
           }, []
@@ -68,23 +68,23 @@ let update msg model : Model * Cmd<Msg> =
         let newMap =
           let map = model.Map
           let (oldStackIndex, oldStack) = map |> findCamelStack droppedCamel
-          let oldStackUpdated = 
-            oldStack 
-            |> List.where (fun c -> c <> droppedCamel) 
+          let oldStackUpdated =
+            oldStack
+            |> List.where (fun c -> c <> droppedCamel)
             |> CamelStack |> Some
           let newField = map.[fieldIndex]
-          let newFieldUpdated = 
+          let newFieldUpdated =
             match newField with
-            | Some (CamelStack s) -> CamelStack (droppedCamel :: s)
+            | Some (CamelStack s) -> CamelStack (droppedCamel :: (s |> List.where (fun c -> c <> droppedCamel)))
             | None -> CamelStack [droppedCamel]
             |> Some
 
-          let newMap = 
-            map 
-            |> setElement fieldIndex newFieldUpdated
+          let newMap =
+            map
             |> setElement oldStackIndex oldStackUpdated
+            |> setElement fieldIndex newFieldUpdated
           newMap
-        {model with 
+        {model with
             Map = newMap
             StageWinChances = calculateChances newMap |> Some
         }, []
