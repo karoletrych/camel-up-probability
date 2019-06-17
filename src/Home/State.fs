@@ -3,12 +3,13 @@ module Home.State
 open Elmish
 open Home.Types
 open Common
-open Main
 
 let allCamels = [Yellow; Blue; Orange; Green; White]
+let fieldsCount = 16
+let maxRollDice = 3
 
 let initialMap : Map =
-    Array.init 16
+    Array.init (fieldsCount + maxRollDice)
         (function
         | 0 -> CamelStack allCamels |> Some
         | _ -> None)

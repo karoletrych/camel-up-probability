@@ -2,7 +2,9 @@ module Home.MoveCamel
 open Home.Types
 open Home.Common
 
-let applyRoll (map : Map) (roll : DiceRoll) : Map =
+type ApplyRollResult = Map * int
+
+let applyRoll (map : Map) (roll : DiceRoll) : ApplyRollResult =
     let {Count = rollNumber; Camel = camel} = roll
     // printfn "map: %A" map
     // printfn "roll: %A" roll
@@ -63,4 +65,4 @@ let applyRoll (map : Map) (roll : DiceRoll) : Map =
                 |> setElement newCamelMapIndex (Some (CamelStack camelsToMove))
     // printfn "map at end: %A" map
     // printfn "" 
-    map        
+    (map, camelMapIndex)        

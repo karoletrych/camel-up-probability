@@ -1,28 +1,36 @@
 module Home.Main
 open Home.Types
+open Home
+open System.Collections.Generic
+
+let takeWhilePlusOne predicate (s:seq<_>) = 
+  let rec loop (en:IEnumerator<_>) = seq {
+    if en.MoveNext() then
+      yield en.Current
+      if predicate en.Current then
+        yield! loop en }
+
+  seq { use en = s.GetEnumerator()
+        yield! loop en }
 
 
-let allCamels = [Yellow; Blue; Orange; Green; White]
-
-
+let playUntilFinish initialState applyRoll (rollSequence : DiceRoll seq) = 
+  rollSequence
+  |> Seq.scan (fun state inp -> 
+       state |> (fun state -> applyRoll (fst state) inp)) (initialState, 0)
+  |> takeWhilePlusOne (fun (_, finalIndex) -> finalIndex < 16)
+  |> Seq.last |> (fun (result, _) -> result)
 
 let winner (map : Map) : Camel = 
     let (Some (CamelStack lastNonEmptyStack)) =
         map
         |> Array.findBack (
             function 
+            | Some (CamelStack []) -> false
             | Some (CamelStack _) -> true
             | _ -> false) 
     lastNonEmptyStack |> List.head
     
-
-let playGame = List.fold MoveCamel.applyRoll
-
-let initialState : Map = 
-    Array.init 16
-        (function
-        | 0 -> CamelStack allCamels |> Some
-        | _ -> None)
 
 let winnerPercentages totalGames = 
     List.map (fun (camel, gamesWon) -> 
@@ -32,7 +40,7 @@ let winnerPercentages totalGames =
 
 let winnerCounts map camelsLeft = 
     RollSequences.allRollCombinations camelsLeft
-    |> Seq.map (playGame map)
+    |> Seq.map (playUntilFinish map MoveCamel.applyRoll)
     |> Seq.map winner
     |> Seq.countBy id
     |> Seq.toList
@@ -41,8 +49,6 @@ let stageWinChances map camelsLeft =
   let winnerCounts = winnerCounts map camelsLeft
   let totalGames = winnerCounts |> List.sumBy snd
   winnerPercentages totalGames winnerCounts
-
-
 
 
 // let randomSimulatedWinnerCounts =

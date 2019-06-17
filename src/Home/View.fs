@@ -11,6 +11,7 @@ let fieldSideVertical = 100 / 5
 
 let camelHeight = fieldSideVertical / 5
 let camelWidth = fieldSideHorizontal
+let fieldsCount = 16
 
 let boardWidth = 100.
 let boardHeight = 100.
@@ -143,6 +144,7 @@ let board model dispatch =
      let camelsIndexed =
          model
          |> Array.toList
+         |> List.take fieldsCount
          |> List.indexed
          |> List.choose (
                   function
