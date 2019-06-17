@@ -160,7 +160,7 @@ let board model dispatch =
    (renderedCamels)
        )
 
-let stageWinChancesSummary (model : (Camel * float) list option) =
+let chancesSummary (model : (Camel * float) list option) =
   match model with
   | Some chances ->
   ul
@@ -180,5 +180,6 @@ let root (model : Model) (dispatch : Msg -> unit) =
     [Style [Display "flex"] ]
     [
       board model.Map dispatch
-      stageWinChancesSummary model.StageWinChances
+      chancesSummary model.StageWinChances
+      chancesSummary model.RaceWinChances
     ]

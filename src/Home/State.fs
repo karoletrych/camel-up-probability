@@ -18,6 +18,7 @@ let initialState = {
   Map = initialMap
   DicesLeft = allCamels
   StageWinChances = None
+  RaceWinChances = None
 }
 
 let init () : Model * Cmd<Msg> =
@@ -35,8 +36,6 @@ let findCamelStack camel model =
 
 
 let update msg model : Model * Cmd<Msg> =
-    let calculateChances map =
-      Main.stageWinChances map (model.DicesLeft)
     match msg with
     | CamelDropped (droppedCamel, place) ->
       match place with
@@ -63,7 +62,8 @@ let update msg model : Model * Cmd<Msg> =
           newMap
         {model with
           Map = newMap
-          StageWinChances = calculateChances newMap |> Some
+          StageWinChances = (Main.stageWinChances newMap model.DicesLeft) |> Some
+          RaceWinChances = (Main.raceWinChances newMap model.DicesLeft) |> Some
           }, []
       | OnField fieldIndex ->
         let newMap =
@@ -87,5 +87,6 @@ let update msg model : Model * Cmd<Msg> =
           newMap
         {model with
             Map = newMap
-            StageWinChances = calculateChances newMap |> Some
+            StageWinChances = (Main.stageWinChances newMap model.DicesLeft) |> Some
+            RaceWinChances = (Main.raceWinChances newMap model.DicesLeft) |> Some
         }, []

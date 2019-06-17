@@ -4,7 +4,7 @@ open Home.Types
 let allCamelsSet = [Yellow; Blue; Orange; Green; White] |> Set.ofList
 
 
-let allRollCombinations camelsLeft = 
+let allRollCombinations dicesLeft = 
     let rec rollCombinations 
         (acc : DiceRoll list) 
         (possibleCamels: Camel List) 
@@ -19,28 +19,28 @@ let allRollCombinations camelsLeft =
             | [] -> yield acc
             | rolls ->
                 for roll in rolls do
-                    let newCamelsLeft = 
+                    let newDicesLeft = 
                         possibleCamels 
                         |> List.where (fun c -> c <> roll.Camel)            
-                    yield! rollCombinations (roll::acc) newCamelsLeft 
+                    yield! rollCombinations (roll::acc) newDicesLeft 
         }
-    rollCombinations [] camelsLeft
+    rollCombinations [] dicesLeft
 
 
 let random = System.Random()
 
-//TODO: maybe it should return seq<DiceRoll> instead of Seq<DiceRoll list>
-let infiniteSimulatedRolls =
-    let rec infiniteSimulatedRolls (acc : DiceRoll list) (remainingCamels : Camel Set) = seq {
-        match remainingCamels with
+let infiniteSimulatedRolls dicesLeft =
+    let rec infiniteSimulatedRolls (acc : DiceRoll list) (remainingDices : Camel Set) = seq {
+        match remainingDices with
         | empty when empty.IsEmpty -> 
             yield acc
             yield! infiniteSimulatedRolls [] allCamelsSet
-        | remainingCamels -> 
-            let randomCamelIndex = random.Next(remainingCamels |> Set.count)
-            let randomCamel = (remainingCamels |> Set.toList).[randomCamelIndex] // TODO: optimize
+        | remainingDices -> 
+            let randomCamelIndex = random.Next(remainingDices |> Set.count)
+            let randomCamel = (remainingDices |> Set.toList).[randomCamelIndex] // TODO: optimize
             let count = random.Next(1,4);
             let roll = {Camel = randomCamel; Count = count}
-            yield! infiniteSimulatedRolls (roll::acc) (remainingCamels |> Set.remove randomCamel)
+            yield! infiniteSimulatedRolls (roll::acc) (remainingDices |> Set.remove randomCamel)
     }
-    infiniteSimulatedRolls [] allCamelsSet
+    infiniteSimulatedRolls [] (Set.ofList dicesLeft)
+    |> Seq.collect id

@@ -38,52 +38,25 @@ let winnerPercentages totalGames =
     )
     >> List.sortByDescending snd
 
-let winnerCounts map camelsLeft = 
-    RollSequences.allRollCombinations camelsLeft
-    |> Seq.map (playUntilFinish map MoveCamel.applyRoll)
+let winnerCounts rolls map = 
+    rolls
+    |> Seq.map (fun game -> playUntilFinish map MoveCamel.applyRoll game)
     |> Seq.map winner
     |> Seq.countBy id
     |> Seq.toList
 
 let stageWinChances map camelsLeft =
-  let winnerCounts = winnerCounts map camelsLeft
+  let rolls = RollSequences.allRollCombinations camelsLeft
+  let winnerCounts = winnerCounts rolls map 
   let totalGames = winnerCounts |> List.sumBy snd
   winnerPercentages totalGames winnerCounts
 
 
-// let randomSimulatedWinnerCounts =
-//     RollSequences.infiniteSimulatedRolls
-//     |> Seq.take 10_000_000
-//     |> Seq.map (playGame initialState)
-//     |> Seq.map winner
-//     |> Seq.countBy id
-//     |> Seq.toList
-
-// randomSimulatedWinnerCounts
-// |> winnerPercentages 10_000_000
-
-// RollSequences.infiniteSimulatedRolls
-// |> Seq.take 1_000_000
-// |> Seq.countBy (fun x -> x |> List.head |> fun x -> x.Count)
-
-
-//TODO: sequence length = 16
-// rollCombinations allCamels
-
-
-// let print (maps : Map list ) =
-//     for m in maps do
-//         printfn "" 
-//         for x in m do
-//             printfn "%A" x
-
-// let test = 
-//     rollCombinations allCamels
-//     |> Seq.map (playGame initialState)
-//     |> Seq.toList
-
-// print test
-
-// let winners =
-//     test
-//     |> List.map winner
+let raceWinChances map camelsLeft =
+  let rolls = 
+    Seq.init 
+      100 
+      (fun _ -> RollSequences.infiniteSimulatedRolls camelsLeft |> Seq.take (5*16))
+  let winnerCounts = winnerCounts rolls map 
+  let totalGames = winnerCounts |> List.sumBy snd
+  winnerPercentages totalGames winnerCounts

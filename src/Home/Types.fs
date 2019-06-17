@@ -26,6 +26,7 @@ type Model = {
     Map : Map
     DicesLeft : Camel list
     StageWinChances : ((Camel * float) list) option
+    RaceWinChances : ((Camel * float) list) option
 }
 
 type DropPlace =
