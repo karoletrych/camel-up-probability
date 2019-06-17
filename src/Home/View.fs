@@ -158,16 +158,18 @@ let board model dispatch =
    (renderedCamels)
        )
 
-let stageWinChancesSummary (model : (Camel * float) list) =
+let stageWinChancesSummary (model : (Camel * float) list option) =
+  match model with
+  | Some chances ->
   ul
     []
     (
-      model
+    chances
       |> List.map (fun (c, f) ->
         let text = sprintf "%s: %f" (c.ToString()) f
-        li [] [ Fable.Helpers.React.HTMLNode.Text text]
-      )
+        li [] [ Fable.Helpers.React.HTMLNode.Text text])
     )
+  | None -> null
 
 
 
@@ -176,5 +178,5 @@ let root (model : Model) (dispatch : Msg -> unit) =
     [Style [Display "flex"] ]
     [
       board model.Map dispatch
-      stageWinChancesSummary []
+      stageWinChancesSummary model.StageWinChances
     ]
