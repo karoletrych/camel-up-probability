@@ -6,15 +6,16 @@ open Types
 
 type SVG = SVGAttr
 
-let fieldSideHorizontal = 100 / 5
-let fieldSideVertical = 100 / 5
+let fieldWidth = 20
+let fieldHeight = 20
 
-let camelHeight = fieldSideVertical / 5
-let camelWidth = fieldSideHorizontal
+let diceWidth = 15
+let diceHeight = 15
+
+let camelHeight = fieldHeight / 5
+let camelWidth = fieldWidth
 let fieldsCount = 16
 
-let boardWidth = 100.
-let boardHeight = 100.
 
 let coordsMapping = Map.ofList [
     (0, (4,2));
@@ -35,9 +36,9 @@ let coordsMapping = Map.ofList [
     (15, (4,1))]
 
 let camelColor = function
-| Camel.Blue -> "blue"
+| Camel.Blue -> "cyan"
 | Camel.Orange -> "orange"
-| Camel.Green -> "green"
+| Camel.Green -> "limegreen"
 | Camel.White -> "white"
 | Camel.Yellow -> "yellow"
 
@@ -81,8 +82,8 @@ let camelStack dispatch (camels : Camel list) fieldIndex =
                 Style [
                     Width (sprintf "%d%%"(camelWidth))
                     Height (sprintf "%d%%"(camelHeight))
-                    Left (sprintf "%d%%"(x * fieldSideHorizontal))
-                    Top (sprintf "%d%%"((y+1) * fieldSideVertical - (camelIndex + 1) * camelHeight))
+                    Left (sprintf "%d%%"(x * fieldWidth))
+                    Top (sprintf "%d%%"((y+1) * fieldHeight - (camelIndex + 1) * camelHeight))
                     BackgroundColor (camelColor camel)
                     CSSProp.Position "absolute"
                     Border "1px solid black"
@@ -109,10 +110,10 @@ let field dispatch fieldIndex  =
           [
               Id (sprintf "field-%d" i)
               Style [
-                  Width (sprintf "%d%%"(fieldSideHorizontal))
-                  Height (sprintf "%d%%"(fieldSideVertical))
-                  Left (sprintf "%d%%"(x*fieldSideHorizontal))
-                  Top (sprintf "%d%%"(y*fieldSideVertical))
+                  Width (sprintf "%d%%"(fieldWidth))
+                  Height (sprintf "%d%%"(fieldHeight))
+                  Left (sprintf "%d%%"(x*fieldWidth))
+                  Top (sprintf "%d%%"(y*fieldHeight))
                   BackgroundColor "#F0E68C"
                   CSSProp.StrokeWidth "1"
                   CSSProp.Stroke "#000000"
@@ -132,6 +133,61 @@ let field dispatch fieldIndex  =
     field (coord, fieldIndex)
 
 
+let camelDice dispatch dice =
+  button [
+    OnClick (fun _ -> MarkDiceAsUsed dice |> dispatch)
+    Style [
+      Width (sprintf "%d%%"(diceWidth))
+      Height (sprintf "%d%%"(diceHeight))
+      BackgroundColor (camelColor dice)
+      Cursor "pointer"
+    ]
+  ] [  ]
+
+let resetButton dispatch =
+    button [
+        OnClick (fun _ -> ResetDices |> dispatch)
+        Style [
+          Width (sprintf "%d%%"(diceWidth))
+          Height (sprintf "%d%%"(diceHeight))
+          Cursor "pointer"
+          Display "flex"
+          AlignItems "flex-end"
+          JustifyContent "center"
+        ]
+    ] [
+      Fable.Helpers.React.HTMLNode.Text "RESET"
+    ]
+
+let pyramid (dicesLeft : Camel list) dispatch =
+    div
+        [
+            Id "pyramid"
+            Style [
+                Top (sprintf "%d%%"(fieldHeight))
+                Left (sprintf "%d%%"(fieldWidth))
+                Width (sprintf "%d%%"(100 - 2 * fieldWidth))
+                Height (sprintf "%d%%"(100 - 2 * fieldHeight))
+                Background "#FFFACD"
+                Position "absolute"
+                Display "flex"
+                FlexDirection "column"
+            ]
+        ]
+        [
+            resetButton dispatch
+            div[
+                    Style
+                        [
+                        Display "flex"
+                        AlignItems "center"
+                        JustifyContent "space-around"
+                        FlexGrow "1"
+                        ]
+                ]
+                (dicesLeft |> List.map (camelDice dispatch))
+        ]
+
 let board model dispatch =
   div [
       Style [
@@ -140,9 +196,9 @@ let board model dispatch =
           CSSProp.Position "relative"
           ]
   ]
-   (
+    (
      let camelsIndexed =
-         model
+         model.Map
          |> Array.toList
          |> List.take fieldsCount
          |> List.indexed
@@ -155,31 +211,37 @@ let board model dispatch =
         camelsIndexed
         |> List.collect (fun (i, camels) -> camelStack dispatch camels i)
         |> List.collect id
-   ( [0..15] |> List.collect (field dispatch))
-   @
-   (renderedCamels)
-       )
+     ([0..15] |> List.collect (field dispatch))
+     @ renderedCamels
+     @ [pyramid model.DicesLeft dispatch]
+   )
 
-let chancesSummary (model : (Camel * float) list option) =
+let chancesSummary title (model : (Camel * float) list option) =
   match model with
   | Some chances ->
-  ul
-    []
-    (
-    chances
-      |> List.map (fun (c, f) ->
-        let text = sprintf "%s: %f" (c.ToString()) f
-        li [] [ Fable.Helpers.React.HTMLNode.Text text])
-    )
+    div [
+        Style[MarginLeft "20px"]
+    ]
+        [
+          div
+              []
+              [Fable.Helpers.React.HTMLNode.Text title]
+          ul
+            []
+            (
+            chances
+              |> List.map (fun (c, f) ->
+                let text = sprintf "%s: %f" (c.ToString()) f
+                li [Style [Background (camelColor c)] ] [ Fable.Helpers.React.HTMLNode.Text text])
+            )
+        ]
   | None -> null
-
-
 
 let root (model : Model) (dispatch : Msg -> unit) =
   div
     [Style [Display "flex"] ]
     [
-      board model.Map dispatch
-      chancesSummary model.StageWinChances
-      chancesSummary model.RaceWinChances
+      board model dispatch
+      chancesSummary "STAGE" model.StageWinChances
+      chancesSummary "WHOLE RACE" model.RaceWinChances
     ]

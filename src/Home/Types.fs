@@ -7,7 +7,7 @@ type Camel =
 | Green
 | White
 
-type Tile = 
+type Tile =
 | Oasis
 | Mirage
 
@@ -35,3 +35,9 @@ type DropPlace =
 
 type Msg =
     | CamelDropped of Camel * DropPlace
+    | ResetDices
+    | MarkDiceAsUsed of Camel
+
+module Constants =
+    let fieldsCount = 16
+    let maxRollDice = 3
