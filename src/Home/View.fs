@@ -231,7 +231,7 @@ let chancesSummary title (model : (Camel * float) list option) =
             (
             chances
               |> List.map (fun (c, f) ->
-                let text = sprintf "%s: %f" (c.ToString()) f
+                let text = sprintf "%f" f
                 li [Style [Background (camelColor c)] ] [ Fable.Helpers.React.HTMLNode.Text text])
             )
         ]
