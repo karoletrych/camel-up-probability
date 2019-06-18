@@ -11,4 +11,8 @@ let root =
         [ str "About page" ]
       p
         [ ]
-        [ str "This template is a simple application build with Fable + Elmish + React." ] ]
+        [ str "This app calculates probabilities of each camel winning in the game Camel Up." ]
+      p
+        [ ]
+        [ str "Built with Fable + Elmish + React." ]
+    ]
