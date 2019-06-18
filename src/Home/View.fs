@@ -220,11 +220,11 @@ let chancesSummary title (model : (Camel * float) list option) =
   match model with
   | Some chances ->
     div [
-        Style[MarginLeft "20px"]
+        Style[MarginLeft "2em"]
     ]
         [
           div
-              []
+              [Style [FontSize "1.5em"]]
               [Fable.Helpers.React.HTMLNode.Text title]
           ul
             []
@@ -232,7 +232,7 @@ let chancesSummary title (model : (Camel * float) list option) =
             chances
               |> List.map (fun (c, f) ->
                 let text = sprintf "%f" f
-                li [Style [Background (camelColor c)] ] [ Fable.Helpers.React.HTMLNode.Text text])
+                li [Style [Background (camelColor c); FontSize "1.5em"]; ] [ Fable.Helpers.React.HTMLNode.Text text])
             )
         ]
   | None -> null
