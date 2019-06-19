@@ -55,7 +55,7 @@ let stageWinChances map camelsLeft =
 let raceWinChances map camelsLeft =
   let rolls =
     Seq.init
-      1000
+      10000
       (fun _ -> RollSequences.infiniteSimulatedRolls camelsLeft)
   let winnerCounts = winnerCounts rolls map
   let totalGames = winnerCounts |> List.sumBy snd
