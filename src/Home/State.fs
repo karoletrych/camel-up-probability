@@ -96,12 +96,13 @@ let update msg model : Model * Cmd<Msg> =
     | ResetDices ->
          {model with
             DicesLeft = allCamels
-            StageWinChances = (Main.stageWinChances model.Map model.DicesLeft) |> Some
-            RaceWinChances = (Main.raceWinChances model.Map model.DicesLeft) |> Some
+            StageWinChances = (Main.stageWinChances model.Map allCamels) |> Some
+            RaceWinChances = (Main.raceWinChances model.Map allCamels) |> Some
          }, []
     | MarkDiceAsUsed(usedDice) ->
+         let newDicesLeft = model.DicesLeft |> List.where (fun d -> d <> usedDice)
          {model with
-            DicesLeft = model.DicesLeft |> List.where (fun d -> d <> usedDice)
-            StageWinChances = (Main.stageWinChances model.Map model.DicesLeft) |> Some
-            RaceWinChances = (Main.raceWinChances model.Map model.DicesLeft) |> Some
+            DicesLeft = newDicesLeft
+            StageWinChances = (Main.stageWinChances model.Map newDicesLeft) |> Some
+            RaceWinChances = (Main.raceWinChances model.Map newDicesLeft) |> Some
          }, []

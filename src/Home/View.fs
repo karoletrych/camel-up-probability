@@ -243,5 +243,5 @@ let root (model : Model) (dispatch : Msg -> unit) =
     [
       board model dispatch
       chancesSummary "STAGE" model.StageWinChances
-      chancesSummary "WHOLE RACE" model.RaceWinChances
+      chancesSummary "RACE" model.RaceWinChances
     ]
