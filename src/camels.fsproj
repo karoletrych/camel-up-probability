@@ -7,12 +7,19 @@
     <Compile Include="Global.fs" />
     <!-- Info -->
     <Compile Include="Info/View.fs" />
+    <!-- Common -->
+    <Compile Include="Common/Common.fs" />
+    <!-- Domain -->
+    <Compile Include="Domain/Types.fs" />
+    <Compile Include="Domain/RollSequences.fs" />
+    <Compile Include="Domain/MoveCamel.fs" />
+    <Compile Include="Domain/Main.fs" />
+
+    <!-- ServiceWorker -->
+    <Compile Include="ServiceWorker/Server.fs" />
+    <Compile Include="ServiceWorker/Client.fs" />
     <!-- Home -->
-    <Compile Include="Home/Common.fs" />
     <Compile Include="Home/Types.fs" />
-    <Compile Include="Home/RollSequences.fs" />
-    <Compile Include="Home/MoveCamel.fs" />
-    <Compile Include="Home/Main.fs" />
     <Compile Include="Home/State.fs" />
     <Compile Include="Home/View.fs" />
     <!-- Navbar -->

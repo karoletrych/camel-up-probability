@@ -1,5 +1,5 @@
-module Home.RollSequences
-open Home.Types
+module Domain.RollSequences
+open Types
 
 let allCamelsSet = [Yellow; Blue; Orange; Green; White] |> Set.ofList
 

@@ -1,6 +1,5 @@
-module Home.Main
-open Home.Types
-open Home
+module Domain.Main
+open Types
 open System.Collections.Generic
 
 let takeWhilePlusOne predicate (s:seq<_>) =

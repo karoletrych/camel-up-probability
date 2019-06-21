@@ -2,7 +2,9 @@ module Home.State
 
 open Elmish
 open Types
-open Common
+open Domain.Types
+open Common.Common
+open Domain.Main
 
 let allCamels = [Yellow; Blue; Orange; Green; White]
 
@@ -19,6 +21,8 @@ let initialState = {
   StageWinChances = None
   RaceWinChances = None
 }
+
+
 
 let init () : Model * Cmd<Msg> =
   initialState, []
@@ -59,8 +63,8 @@ let handleCamelDropped msg model (droppedCamel, place) =
         newMap
       {model with
         Map = newMap
-        StageWinChances = (Main.stageWinChances newMap model.DicesLeft) |> Some
-        RaceWinChances = (Main.raceWinChances newMap model.DicesLeft) |> Some
+        StageWinChances = (Domain.Main.stageWinChances newMap model.DicesLeft) |> Some
+        RaceWinChances = (Domain.Main.raceWinChances newMap model.DicesLeft) |> Some
         }, []
     | OnField fieldIndex ->
       let newMap =
@@ -84,8 +88,8 @@ let handleCamelDropped msg model (droppedCamel, place) =
         newMap
       {model with
           Map = newMap
-          StageWinChances = (Main.stageWinChances newMap model.DicesLeft) |> Some
-          RaceWinChances = (Main.raceWinChances newMap model.DicesLeft) |> Some
+          StageWinChances = (Domain.Main.stageWinChances newMap model.DicesLeft) |> Some
+          RaceWinChances = (Domain.Main.raceWinChances newMap model.DicesLeft) |> Some
       }, []
 
 
@@ -96,13 +100,13 @@ let update msg model : Model * Cmd<Msg> =
     | ResetDices ->
          {model with
             DicesLeft = allCamels
-            StageWinChances = (Main.stageWinChances model.Map allCamels) |> Some
-            RaceWinChances = (Main.raceWinChances model.Map allCamels) |> Some
+            StageWinChances = (Domain.Main.stageWinChances model.Map allCamels) |> Some
+            RaceWinChances = (Domain.Main.raceWinChances model.Map allCamels) |> Some
          }, []
     | MarkDiceAsUsed(usedDice) ->
          let newDicesLeft = model.DicesLeft |> List.where (fun d -> d <> usedDice)
          {model with
             DicesLeft = newDicesLeft
-            StageWinChances = (Main.stageWinChances model.Map newDicesLeft) |> Some
-            RaceWinChances = (Main.raceWinChances model.Map newDicesLeft) |> Some
+            StageWinChances = (Domain.Main.stageWinChances model.Map newDicesLeft) |> Some
+            RaceWinChances = (Domain.Main.raceWinChances model.Map newDicesLeft) |> Some
          }, []

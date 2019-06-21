@@ -1,6 +1,6 @@
-module Home.Common
+module Common.Common
 
-let setElement key newEl = 
+let setElement key newEl =
     Array.mapi (fun i v -> if i = key then newEl else v)
 
 let insertElement key newEl list =

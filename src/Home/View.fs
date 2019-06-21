@@ -3,6 +3,7 @@ module Home.View
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Types
+open Domain.Types
 
 type SVG = SVGAttr
 
