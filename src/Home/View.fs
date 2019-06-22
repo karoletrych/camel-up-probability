@@ -10,8 +10,6 @@ type SVG = SVGAttr
 let fieldWidth = 20
 let fieldHeight = 20
 
-let diceWidth = 15
-let diceHeight = 15
 
 let camelHeight = fieldHeight / 5
 let camelWidth = fieldWidth
@@ -135,33 +133,39 @@ let field dispatch fieldIndex  =
     field (coord, fieldIndex)
 
 
-let camelDice dispatch dice =
-  button [
-    OnClick (fun _ -> MarkDiceAsUsed dice |> dispatch)
-    Style [
-      Width (sprintf "%d%%"(diceWidth))
-      Height (sprintf "%d%%"(diceHeight))
-      BackgroundColor (camelColor dice)
-      Cursor "pointer"
+let camelDices dispatch dice =
+  div [] (
+    [
+      "X", MarkDiceAsUsed dice;
+      "1", RollDice (dice, 1);
+      "2", RollDice (dice, 2);
+      "3", RollDice (dice, 3)
     ]
-  ] [  ]
+    |> List.map
+        (fun (label, command) ->
+        button [
+            OnClick (fun _ -> command |> dispatch)
+            Style [
+              BackgroundColor (camelColor dice)
+            ]
+          ] [
+            Fable.Helpers.React.HTMLNode.Text label
+          ])
+    )
+
 
 let resetButton dispatch =
     button [
         OnClick (fun _ -> ResetDices |> dispatch)
+        Class "reset-button"
         Style [
-          Width (sprintf "%d%%"(diceWidth))
-          Height (sprintf "%d%%"(diceHeight))
-          Cursor "pointer"
-          Display "flex"
-          AlignItems "flex-end"
-          JustifyContent "center"
+
         ]
     ] [
       Fable.Helpers.React.HTMLNode.Text "RESET"
     ]
 
-let pyramid (dicesLeft : Camel list) dispatch =
+let boardCenter (dicesLeft : Camel list) dispatch =
     div
         [
             Id "pyramid"
@@ -178,16 +182,8 @@ let pyramid (dicesLeft : Camel list) dispatch =
         ]
         [
             resetButton dispatch
-            div[
-                    Style
-                        [
-                        Display "flex"
-                        AlignItems "center"
-                        JustifyContent "space-around"
-                        FlexGrow "1"
-                        ]
-                ]
-                (dicesLeft |> List.map (camelDice dispatch))
+            div[ Class "dices-grid"]
+              (dicesLeft |> List.map (camelDices dispatch))
         ]
 
 let board model dispatch =
@@ -215,7 +211,7 @@ let board model dispatch =
         |> List.collect id
      ([0..15] |> List.collect (field dispatch))
      @ renderedCamels
-     @ [pyramid model.DicesLeft dispatch]
+     @ [boardCenter model.DicesLeft dispatch]
    )
 
 let chancesSummary title (model : (Camel * float) list option) =
