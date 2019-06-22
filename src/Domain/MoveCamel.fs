@@ -2,9 +2,7 @@ module Domain.MoveCamel
 open Types
 open Common.Common
 
-type ApplyRollResult = Map * int
-
-let applyRoll (map : Map) (roll : DiceRoll) : ApplyRollResult =
+let applyRoll (map : Map) (roll : DiceRoll) : Map * int =
     let {Count = rollNumber; Camel = camel} = roll
     // printfn "map: %A" map
     // printfn "roll: %A" roll

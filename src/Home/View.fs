@@ -158,9 +158,6 @@ let resetButton dispatch =
     button [
         OnClick (fun _ -> ResetDices |> dispatch)
         Class "reset-button"
-        Style [
-
-        ]
     ] [
       Fable.Helpers.React.HTMLNode.Text "RESET"
     ]
@@ -229,7 +226,7 @@ let chancesSummary title (model : (Camel * float) list option) =
             (
             chances
               |> List.map (fun (c, f) ->
-                let text = sprintf "%f" f
+                let text = sprintf "%.5g" (100. * f)
                 li [Style [Background (camelColor c); FontSize "1.5em"]; ] [ Fable.Helpers.React.HTMLNode.Text text])
             )
         ]
@@ -240,6 +237,6 @@ let root (model : Model) (dispatch : Msg -> unit) =
     [Style [Display "flex"] ]
     [
       board model dispatch
-      chancesSummary "STAGE" model.StageWinChances
-      chancesSummary "RACE" model.RaceWinChances
+      chancesSummary "STAGE(%)" model.StageWinChances
+      chancesSummary "RACE(%)" model.RaceWinChances
     ]

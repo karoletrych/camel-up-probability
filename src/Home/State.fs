@@ -39,7 +39,7 @@ let findCamelStack camel model =
   |> Array.head
 
 let createCalculationCmd map dicesLeft =
-  let stageCommand = ServiceWorker.Api.CalculateRaceWinChancesCommand {Map = map; DicesLeft = dicesLeft}
+  let stageCommand = ServiceWorker.Api.CalculateStageWinChancesCommand {Map = map; DicesLeft = dicesLeft}
   let raceCommand = ServiceWorker.Api.CalculateRaceWinChancesCommand {Map = map; DicesLeft = dicesLeft}
 
   let stagePromiseCommand =
@@ -117,11 +117,22 @@ let update msg model : Model * Cmd<Msg> =
          {model with
             DicesLeft = allCamels
          }, createCalculationCmd model.Map allCamels
-    | MarkDiceAsUsed(usedDice) ->
-         let newDicesLeft = model.DicesLeft |> List.where (fun d -> d <> usedDice)
+    | MarkDiceAsUsed(dice) ->
+         let newDicesLeft = model.DicesLeft |> List.where (fun d -> d <> dice)
          {model with
             DicesLeft = newDicesLeft
          }, createCalculationCmd model.Map newDicesLeft
     | RaceWinChancesComputed(chances) -> {model with RaceWinChances = Some chances}, []
     | StageWinChancesComputed(chances) ->  {model with StageWinChances = Some chances}, []
     | ComputationError -> failwith "Not Implemented"
+    | RollDice(dice, count) ->
+      let (newMap, newIndex) = Domain.MoveCamel.applyRoll model.Map {Count = count; Camel = dice}
+
+      if newIndex < Domain.Types.Constants.fieldsCount then
+        let newDicesLeft = model.DicesLeft |> List.where (fun d -> d <> dice)
+        {model with
+            Map = newMap
+            DicesLeft = newDicesLeft
+        }, createCalculationCmd newMap newDicesLeft
+
+      else model, []
