@@ -14,10 +14,8 @@
     <Compile Include="Domain/RollSequences.fs" />
     <Compile Include="Domain/MoveCamel.fs" />
     <Compile Include="Domain/Main.fs" />
-
     <!-- ServiceWorker -->
-    <Compile Include="ServiceWorker/Server.fs" />
-    <Compile Include="ServiceWorker/Client.fs" />
+    <Compile Include="ServiceWorkerClient.fs" />
     <!-- Home -->
     <Compile Include="Home/Types.fs" />
     <Compile Include="Home/State.fs" />

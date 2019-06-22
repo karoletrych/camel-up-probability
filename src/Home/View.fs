@@ -53,6 +53,7 @@ let camelFromId id =
   | _ -> failwith (sprintf "invalid camel id: %s" id)
 
 open Fable.Import.React
+open Fable.Import
 
 let allowDrop(ev : DragEvent) =
   ev.preventDefault()

@@ -28,6 +28,8 @@ let init result =
           { CurrentPage = Home
             Home = home }
 
+    ServiceWorkerClient.install ()
+
     model, Cmd.batch [ cmd
                        Cmd.map HomeMsg homeCmd ]
 

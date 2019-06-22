@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Common -->
+    <Compile Include="../Common/Common.fs" />
+    <!-- Domain -->
+    <Compile Include="../Domain/Types.fs" />
+    <Compile Include="../Domain/RollSequences.fs" />
+    <Compile Include="../Domain/MoveCamel.fs" />
+    <Compile Include="../Domain/Main.fs" />
+    <!-- ServiceWorker -->
+    <Compile Include="Server.fs" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>

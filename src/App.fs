@@ -62,6 +62,7 @@ open Elmish.React
 open Elmish.Debug
 open Elmish.HMR
 
+
 // App
 Program.mkProgram init update root
 |> Program.toNavigable (parseHash pageParser) urlUpdate

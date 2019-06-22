@@ -16,7 +16,8 @@ var CONFIG = {
     // The tags to include the generated JS and CSS will be automatically injected in the HTML template
     // See https://github.com/jantimon/html-webpack-plugin
     indexHtmlTemplate: "./src/index.html",
-    fsharpEntry: "./src/camels.fsproj",
+    appEntry: "./src/camels.fsproj",
+    serviceWorkerEntry: "./src/ServiceWorker/ServiceWorker.fsproj",
     cssEntry: "./sass/main.sass",
     outputDir: "./deploy",
     assetsDir: "./public",
@@ -52,13 +53,13 @@ var commonPlugins = [
     })
 ];
 
-module.exports = {
+const appConfig = {
     // In development, bundle styles together with the code so they can also
     // trigger hot reloads. In production, put them in a separate CSS file.
     entry: isProduction ? {
-        app: [resolve(CONFIG.fsharpEntry), resolve(CONFIG.cssEntry)]
+        app: [resolve(CONFIG.appEntry), resolve(CONFIG.cssEntry)]
     } : {
-            app: [resolve(CONFIG.fsharpEntry)],
+            app: [resolve(CONFIG.appEntry)],
             style: [resolve(CONFIG.cssEntry)]
         },
     // Add a hash to the output file name in production
@@ -153,6 +154,51 @@ module.exports = {
         ]
     }
 };
+
+const serviceWorkerConfig =
+{
+    entry: {
+        app: [resolve(CONFIG.serviceWorkerEntry)]
+    },
+    // Add a hash to the output file name in production
+    // to prevent browser caching if code changes
+    output: {
+        path: resolve(CONFIG.outputDir),
+        filename: "sw.js"
+    },
+    target:"webworker",
+    mode: isProduction ? "production" : "development",
+    devtool: isProduction ? "source-map" : "eval-source-map",
+    plugins: commonPlugins,
+    resolve: {
+        // See https://github.com/fable-compiler/Fable/issues/1490
+        symlinks: false
+    },
+    module: {
+        rules: [
+            {
+                test: /\.fs(x|proj)?$/,
+                use: {
+                    loader: "fable-loader",
+                    options: {
+                        babel: CONFIG.babel
+                    }
+                }
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: CONFIG.babel
+                },
+            }
+        ]
+    }
+};
+
+module.exports = [appConfig, serviceWorkerConfig ]
+
 
 function resolve(filePath) {
     return path.isAbsolute(filePath) ? filePath : path.join(__dirname, filePath);
