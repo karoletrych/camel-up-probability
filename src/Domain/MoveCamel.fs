@@ -10,13 +10,13 @@ let applyRoll (map : Map) (roll : DiceRoll) : ApplyRollResult =
     // printfn "roll: %A" roll
 
     let (camelMapIndex, Some (CamelStack camelStack)) =
-        map
-        |> Array.indexed
-        |> Array.find (
-            function
-            | (_, Some (CamelStack s)) -> s |> List.contains camel
-            | _ -> false
-        )
+      map
+      |> Array.indexed
+      |> Array.find (
+          function
+          | (_, Some (CamelStack s)) -> s |> List.contains camel
+          | _ -> false
+      )
 
     let camelStackIndex = camelStack |> List.findIndex ((=) camel)
 

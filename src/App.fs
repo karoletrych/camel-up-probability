@@ -62,6 +62,7 @@ open Elmish.React
 open Elmish.Debug
 open Elmish.HMR
 
+ServiceWorkerClient.install ()
 
 // App
 Program.mkProgram init update root

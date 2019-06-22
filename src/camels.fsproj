@@ -15,6 +15,7 @@
     <Compile Include="Domain/MoveCamel.fs" />
     <Compile Include="Domain/Main.fs" />
     <!-- ServiceWorker -->
+    <Compile Include="ServiceWorker/Api.fs" />
     <Compile Include="ServiceWorkerClient.fs" />
     <!-- Home -->
     <Compile Include="Home/Types.fs" />

@@ -17,4 +17,7 @@ type Msg =
     | CamelDropped of Camel * DropPlace
     | ResetDices
     | MarkDiceAsUsed of Camel
+    | RaceWinChancesComputed of ((Camel * float) list)
+    | StageWinChancesComputed of ((Camel * float) list)
+    | ComputationError
 

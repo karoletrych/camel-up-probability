@@ -5,6 +5,7 @@ open Types
 open Domain.Types
 open Common.Common
 open Domain.Main
+open Fable.Import.Browser
 
 let allCamels = [Yellow; Blue; Orange; Green; White]
 
@@ -37,6 +38,24 @@ let findCamelStack camel model =
                     | _ -> None)
   |> Array.head
 
+let createCalculationCmd map dicesLeft =
+  let stageCommand = ServiceWorker.Api.CalculateRaceWinChancesCommand {Map = map; DicesLeft = dicesLeft}
+  let raceCommand = ServiceWorker.Api.CalculateRaceWinChancesCommand {Map = map; DicesLeft = dicesLeft}
+
+  let stagePromiseCommand =
+    Cmd.ofPromise
+      ServiceWorkerClient.postMsg
+      stageCommand
+      (fun r -> StageWinChancesComputed r)
+      (fun _ -> ComputationError)
+
+  let racePromiseCommand =
+    Cmd.ofPromise
+      ServiceWorkerClient.postMsg
+      raceCommand
+      (fun r -> RaceWinChancesComputed r)
+      (fun _ -> ComputationError)
+  Cmd.batch [stagePromiseCommand; racePromiseCommand]
 
 let handleCamelDropped msg model (droppedCamel, place) =
     match place with
@@ -63,9 +82,7 @@ let handleCamelDropped msg model (droppedCamel, place) =
         newMap
       {model with
         Map = newMap
-        StageWinChances = (Domain.Main.stageWinChances newMap model.DicesLeft) |> Some
-        RaceWinChances = (Domain.Main.raceWinChances newMap model.DicesLeft) |> Some
-        }, []
+        }, createCalculationCmd newMap model.DicesLeft
     | OnField fieldIndex ->
       let newMap =
         let map = model.Map
@@ -86,11 +103,10 @@ let handleCamelDropped msg model (droppedCamel, place) =
           |> setElement oldStackIndex oldStackUpdated
           |> setElement fieldIndex newFieldUpdated
         newMap
+
       {model with
           Map = newMap
-          StageWinChances = (Domain.Main.stageWinChances newMap model.DicesLeft) |> Some
-          RaceWinChances = (Domain.Main.raceWinChances newMap model.DicesLeft) |> Some
-      }, []
+      }, createCalculationCmd newMap model.DicesLeft
 
 
 let update msg model : Model * Cmd<Msg> =
@@ -100,13 +116,12 @@ let update msg model : Model * Cmd<Msg> =
     | ResetDices ->
          {model with
             DicesLeft = allCamels
-            StageWinChances = (Domain.Main.stageWinChances model.Map allCamels) |> Some
-            RaceWinChances = (Domain.Main.raceWinChances model.Map allCamels) |> Some
-         }, []
+         }, createCalculationCmd model.Map allCamels
     | MarkDiceAsUsed(usedDice) ->
          let newDicesLeft = model.DicesLeft |> List.where (fun d -> d <> usedDice)
          {model with
             DicesLeft = newDicesLeft
-            StageWinChances = (Domain.Main.stageWinChances model.Map newDicesLeft) |> Some
-            RaceWinChances = (Domain.Main.raceWinChances model.Map newDicesLeft) |> Some
-         }, []
+         }, createCalculationCmd model.Map newDicesLeft
+    | RaceWinChancesComputed(chances) -> {model with RaceWinChances = Some chances}, []
+    | StageWinChancesComputed(chances) ->  {model with StageWinChances = Some chances}, []
+    | ComputationError -> failwith "Not Implemented"
