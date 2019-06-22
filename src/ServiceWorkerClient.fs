@@ -35,7 +35,7 @@ let postMsg (command : Command) =
 let install () =
   if hasSWSupport() then
       Browser.window.addEventListener_load(fun ev ->
-        Browser.navigator.serviceWorker.register("/sw.js")
+        Browser.navigator.serviceWorker.register("/camel-up-probability/sw.js")
         |> Promise.map (fun registration ->
           printfn "registration successful %A" registration
         )

@@ -21,6 +21,7 @@ var CONFIG = {
     cssEntry: "./sass/main.sass",
     outputDir: "./deploy",
     assetsDir: "./public",
+    publicPath: "/camel-up-probability/",
     devServerPort: 8080,
     // When using webpack-dev-server, you may need to redirect some calls
     // to a external API server. See https://webpack.js.org/configuration/dev-server/#devserver-proxy
@@ -65,8 +66,9 @@ const appConfig = {
     // Add a hash to the output file name in production
     // to prevent browser caching if code changes
     output: {
-        path: resolve(CONFIG.outputDir),
-        filename: isProduction ? '[name].[hash].js' : '[name].js'
+      path: resolve(CONFIG.outputDir),
+      filename: isProduction ? '[name].[hash].js' : '[name].js',
+      publicPath: resolve(CONFIG.publicPath)
     },
     mode: isProduction ? "production" : "development",
     devtool: isProduction ? "source-map" : "eval-source-map",
@@ -158,13 +160,14 @@ const appConfig = {
 const serviceWorkerConfig =
 {
     entry: {
-        app: [resolve(CONFIG.serviceWorkerEntry)]
+      app: [resolve(CONFIG.serviceWorkerEntry)]
     },
     // Add a hash to the output file name in production
     // to prevent browser caching if code changes
     output: {
-        path: resolve(CONFIG.outputDir),
-        filename: "sw.js"
+      path: resolve(CONFIG.outputDir),
+      filename: "sw.js",
+      publicPath: resolve(CONFIG.publicPath)
     },
     target:"webworker",
     mode: isProduction ? "production" : "development",
