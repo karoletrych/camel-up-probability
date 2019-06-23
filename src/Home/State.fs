@@ -130,11 +130,16 @@ let update msg model : Model * Cmd<Msg> =
     | RaceWinChancesComputed(chances) -> {model with RaceWinChances = Some chances}, []
     | StageWinChancesComputed(chances) ->  {model with StageWinChances = Some chances}, []
     | FlipPlate (plateIndex) ->
-      let target = model.Map |> Array.tryItem plateIndex
-      match target with
-      | Some (Some (Plate PlusOne)) -> {model with Map = model.Map |> setElement plateIndex (Some (Plate MinusOne))}, []
-      | Some (Some (Plate MinusOne)) ->  {model with Map = model.Map |> setElement plateIndex (Some (Plate PlusOne))}, []
-      | _ -> model, []
+      let plate = model.Map.[plateIndex]
+      let newMap =
+        match plate with
+        | Some (Plate PlusOne) ->
+          model.Map |> setElement plateIndex (Some (Plate MinusOne))
+        | Some (Plate MinusOne) ->
+          model.Map |> setElement plateIndex (Some (Plate PlusOne))
+        | _ -> failwith "not a plate"
+      {model with Map = newMap}, createCalculationCmd newMap model.DicesLeft
+
     | ComputationError -> failwith "Not Implemented"
     | RollDice(dice, count) ->
       let (newMap, newIndex) = Domain.MoveCamel.applyRoll model.Map {Count = count; Camel = dice}
