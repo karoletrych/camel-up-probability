@@ -53,7 +53,7 @@ let applyRoll (map : Map) (roll : DiceRoll) : Map * int =
             map
         | Some field ->
             match field with
-            | Some (Tile t) -> failwith "TODO: Tile"
+            | Some (Plate t) -> failwith "TODO: Tile"
             | Some (CamelStack camels) ->
                 let newCamelStack =  camelsToMove @ camels
                 mapWithRemovedCamels

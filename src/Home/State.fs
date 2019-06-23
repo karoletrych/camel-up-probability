@@ -4,8 +4,6 @@ open Elmish
 open Types
 open Domain.Types
 open Common.Common
-open Domain.Main
-open Fable.Import.Browser
 
 let allCamels = [Yellow; Blue; Orange; Green; White]
 
@@ -14,6 +12,8 @@ let initialMap : Map =
     Array.init (Constants.fieldsCount + Constants.maxRollDice)
         (function
         | 0 -> CamelStack allCamels |> Some
+        | 3 -> PlusOne |> Plate |> Some
+        | 6 -> MinusOne |> Plate |> Some
         | _ -> None)
 
 let initialState = {
@@ -22,8 +22,6 @@ let initialState = {
   StageWinChances = None
   RaceWinChances = None
 }
-
-
 
 let init () : Model * Cmd<Msg> =
   initialState, []
@@ -113,6 +111,13 @@ let update msg model : Model * Cmd<Msg> =
     match msg with
     | CamelDropped (place, camel) ->
         handleCamelDropped msg model (place, camel)
+    | ExistingPlateDropped(plateIndex, fieldIndex) ->
+        let plate = model.Map.[plateIndex]
+        let newMap =
+          model.Map
+          |> setElement fieldIndex plate
+          |> setElement plateIndex None
+        {model with Map = newMap}, []
     | ResetDices ->
          {model with
             DicesLeft = allCamels
@@ -124,6 +129,12 @@ let update msg model : Model * Cmd<Msg> =
          }, createCalculationCmd model.Map newDicesLeft
     | RaceWinChancesComputed(chances) -> {model with RaceWinChances = Some chances}, []
     | StageWinChancesComputed(chances) ->  {model with StageWinChances = Some chances}, []
+    | FlipPlate (plateIndex) ->
+      let target = model.Map |> Array.tryItem plateIndex
+      match target with
+      | Some (Some (Plate PlusOne)) -> {model with Map = model.Map |> setElement plateIndex (Some (Plate MinusOne))}, []
+      | Some (Some (Plate MinusOne)) ->  {model with Map = model.Map |> setElement plateIndex (Some (Plate PlusOne))}, []
+      | _ -> model, []
     | ComputationError -> failwith "Not Implemented"
     | RollDice(dice, count) ->
       let (newMap, newIndex) = Domain.MoveCamel.applyRoll model.Map {Count = count; Camel = dice}

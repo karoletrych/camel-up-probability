@@ -15,9 +15,16 @@ type DropPlace =
 
 type Msg =
     | CamelDropped of Camel * DropPlace
+    // plates
+    | ExistingPlateDropped of int * int
+    | NewPlateDropped of Plate * int
+    | FlipPlate of int
+    // dices
     | ResetDices
     | MarkDiceAsUsed of Camel
     | RollDice of Camel * int
+
+    // async computations
     | RaceWinChancesComputed of ((Camel * float) list)
     | StageWinChancesComputed of ((Camel * float) list)
     | ComputationError

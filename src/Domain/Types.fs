@@ -7,9 +7,9 @@ type Camel =
 | Green
 | White
 
-type Tile =
-| Oasis
-| Mirage
+type Plate =
+| PlusOne
+| MinusOne
 
 type DiceRoll = {
     Count : int
@@ -17,7 +17,7 @@ type DiceRoll = {
 }
 
 type Field =
-| Tile of Tile
+| Plate of Plate
 | CamelStack of Camel list
 
 type Map = Field option array

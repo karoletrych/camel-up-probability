@@ -10,10 +10,10 @@ type SVG = SVGAttr
 let fieldWidth = 20
 let fieldHeight = 20
 
+let plateMargin = 2 // TODO: remove this crap
 
 let camelHeight = fieldHeight / 5
 let camelWidth = fieldWidth
-let fieldsCount = 16
 
 
 let coordsMapping = Map.ofList [
@@ -41,36 +41,40 @@ let camelColor = function
 | Camel.White -> "white"
 | Camel.Yellow -> "yellow"
 
-let camelFromId id =
-  match id with
-  | "camel-blue" -> Camel.Blue
-  | "camel-orange" -> Camel.Orange
-  | "camel-green" -> Camel.Green
-  | "camel-white" -> Camel.White
-  | "camel-yellow" -> Camel.Yellow
-  | _ -> failwith (sprintf "invalid camel id: %s" id)
+let tryParseCamelFromId =
+  function
+  | "camel-blue" -> Camel.Blue |> Some
+  | "camel-orange" -> Camel.Orange |> Some
+  | "camel-green" -> Camel.Green |> Some
+  | "camel-white" -> Camel.White |> Some
+  | "camel-yellow" -> Camel.Yellow |> Some
+  | _ -> None
+
 
 open Fable.Import.React
 open Fable.Import
 
-let allowDrop(ev : DragEvent) =
-  ev.preventDefault()
+module Draggable =
+  let allowDrop(ev : DragEvent) =
+    ev.preventDefault()
 
+  let dragStart (ev : DragEvent) =
+    let id = (ev.target :?> Fable.Import.Browser.Element).id
+    ev.dataTransfer.setData("text", id) |> ignore
 
-let camelStack dispatch (camels : Camel list) fieldIndex =
+let camelStackView dispatch (camels : Camel list) fieldIndex =
     let (x, y) = coordsMapping |> Map.find fieldIndex
 
-    let dragStart (ev : DragEvent) =
-      let id = (ev.target :?> Fable.Import.Browser.Element).id
-      ev.dataTransfer.setData("text", id) |> ignore
 
     let drop(ev : DragEvent) =
       ev.preventDefault()
       let targetCamelElement = (ev.target :?> Fable.Import.Browser.Element)
-      let targetCamel = camelFromId targetCamelElement.id
+      let targetCamel = tryParseCamelFromId targetCamelElement.id
       let camelId = ev.dataTransfer.getData("text")
-      let camel = camelFromId camelId
-      CamelDropped (camel, OnTopOfCamel (targetCamel)) |> dispatch
+      let camel = tryParseCamelFromId camelId
+      match targetCamel, camel with
+      | Some targetCamel, Some camel -> CamelDropped (camel, OnTopOfCamel (targetCamel)) |> dispatch
+      | _ -> ()
 
     camels
     |> List.rev
@@ -90,20 +94,46 @@ let camelStack dispatch (camels : Camel list) fieldIndex =
                     Cursor "pointer"
                     ]
                 Draggable true
-                OnDragStart dragStart
-                OnDragOver allowDrop
+                OnDragStart Draggable.dragStart
+                OnDragOver Draggable.allowDrop
                 OnDrop drop
               ] []
         ])
+    |> List.collect id
 
-let field dispatch fieldIndex  =
+let plateView dispatch (plate : Plate) fieldIndex =
+  let (x, y) = coordsMapping |> Map.find fieldIndex
+  let text =
+    match plate with
+    | PlusOne -> "+1"
+    | MinusOne -> "-1"
+  div [
+       Id (sprintf "plate-%d" fieldIndex)
+       Class "plate"
+       Draggable true
+       OnDragStart Draggable.dragStart
+       OnDragOver Draggable.allowDrop
+       OnClick (fun _ -> FlipPlate fieldIndex |> dispatch)
+       Style [
+          Left (sprintf "%d%%" (x * fieldWidth + plateMargin))
+          Top (sprintf "%d%%" (y * fieldHeight + plateMargin))
+       ]
+    ]
+    [Fable.Helpers.React.HTMLNode.Text (text)]
+
+let fieldView dispatch fieldIndex  =
     let drop(ev : DragEvent) =
       ev.preventDefault()
       let target = (ev.target :?> Fable.Import.Browser.Element)
       let fieldIndex = int (System.Text.RegularExpressions.Regex.Match(target.id, @"\d+").Value);
-      let camelId = ev.dataTransfer.getData("text")
-      let camel = camelFromId camelId
-      CamelDropped (camel, OnField (fieldIndex)) |> dispatch
+      let subjectId = ev.dataTransfer.getData("text")
+
+      let camel = tryParseCamelFromId subjectId
+      match camel with
+      | Some c -> CamelDropped (c, OnField (fieldIndex)) |> dispatch
+      | None ->
+        let plateIndex = int (System.Text.RegularExpressions.Regex.Match(subjectId, @"\d+").Value)
+        ExistingPlateDropped (plateIndex, fieldIndex) |> dispatch
 
     let field ((x,y),i) =
         [div
@@ -124,7 +154,7 @@ let field dispatch fieldIndex  =
                   Border "2px solid black"
               ]
               OnDrop drop
-              OnDragOver allowDrop
+              OnDragOver Draggable.allowDrop
           ]
           [Fable.Helpers.React.HTMLNode.Text (string (i+1))]
         ]
@@ -133,7 +163,7 @@ let field dispatch fieldIndex  =
     field (coord, fieldIndex)
 
 
-let camelDices dispatch dice =
+let dicesView dispatch dice =
   div [] (
     [
       "X", MarkDiceAsUsed dice;
@@ -154,7 +184,7 @@ let camelDices dispatch dice =
     )
 
 
-let resetButton dispatch =
+let resetButtonView dispatch =
     button [
         OnClick (fun _ -> ResetDices |> dispatch)
         Class "reset-button"
@@ -162,7 +192,7 @@ let resetButton dispatch =
       Fable.Helpers.React.HTMLNode.Text "RESET"
     ]
 
-let boardCenter (dicesLeft : Camel list) dispatch =
+let boardCenterView (dicesLeft : Camel list) dispatch =
     div
         [
             Id "pyramid"
@@ -178,40 +208,31 @@ let boardCenter (dicesLeft : Camel list) dispatch =
             ]
         ]
         [
-            resetButton dispatch
+            resetButtonView dispatch
             div[ Class "dices-grid"]
-              (dicesLeft |> List.map (camelDices dispatch))
+              (dicesLeft |> List.map (dicesView dispatch))
         ]
 
-let board model dispatch =
-  div [
-      Style [
-          Width "500px"
-          Height "500px"
-          CSSProp.Position "relative"
-          ]
-  ]
+let boardView model dispatch =
+  div [ Style [Width "500px"; Height "500px"; CSSProp.Position "relative"]  ]
     (
-     let camelsIndexed =
-         model.Map
-         |> Array.toList
-         |> List.take fieldsCount
-         |> List.indexed
-         |> List.choose (
-                  function
-                  | (i, Some (CamelStack stack)) -> Some (i, stack)
-                  | _ -> None
-                  )
-     let renderedCamels =
-        camelsIndexed
-        |> List.collect (fun (i, camels) -> camelStack dispatch camels i)
+      let fieldContents =
+        model.Map
+        |> List.ofArray
+        |> List.take Domain.Types.Constants.fieldsCount
+        |> List.indexed
+        |> List.map (function
+          | (i, Some (CamelStack stack)) -> camelStackView dispatch stack i
+          | (i, Some (Plate p)) -> [plateView dispatch p i]
+          | (_, None) -> [])
         |> List.collect id
-     ([0..15] |> List.collect (field dispatch))
-     @ renderedCamels
-     @ [boardCenter model.DicesLeft dispatch]
-   )
 
-let chancesSummary title (model : (Camel * float) list option) =
+     ([0..15] |> List.collect (fieldView dispatch))
+     @ fieldContents
+     @ [boardCenterView model.DicesLeft dispatch]
+    )
+
+let chancesSummaryView title (model : (Camel * float) list option) =
   match model with
   | Some chances ->
     div [
@@ -236,7 +257,7 @@ let root (model : Model) (dispatch : Msg -> unit) =
   div
     [Style [Display "flex"] ]
     [
-      board model dispatch
-      chancesSummary "STAGE(%)" model.StageWinChances
-      chancesSummary "RACE(%)" model.RaceWinChances
+      boardView model dispatch
+      chancesSummaryView "STAGE(%)" model.StageWinChances
+      chancesSummaryView "RACE(%)" model.RaceWinChances
     ]
