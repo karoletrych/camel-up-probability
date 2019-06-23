@@ -17,8 +17,10 @@ type Msg =
     | CamelDropped of Camel * DropPlace
     // plates
     | ExistingPlateDropped of int * int
-    | NewPlateDropped of Plate * int
+    | NewPlateDroppedOnBoard of Plate * int
     | FlipPlate of int
+    | RemovePlates
+
     // dices
     | ResetDices
     | MarkDiceAsUsed of Camel

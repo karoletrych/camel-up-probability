@@ -15,7 +15,6 @@ let plateMargin = 2 // TODO: remove this crap
 let camelHeight = fieldHeight / 5
 let camelWidth = fieldWidth
 
-
 let coordsMapping = Map.ofList [
     (0, (4,2));
     (1, (4,3));
@@ -64,7 +63,6 @@ module Draggable =
 
 let camelStackView dispatch (camels : Camel list) fieldIndex =
     let (x, y) = coordsMapping |> Map.find fieldIndex
-
 
     let drop(ev : DragEvent) =
       ev.preventDefault()
@@ -121,19 +119,28 @@ let plateView dispatch (plate : Plate) fieldIndex =
     ]
     [Fable.Helpers.React.HTMLNode.Text (text)]
 
+open System.Text.RegularExpressions
 let fieldView dispatch fieldIndex  =
     let drop(ev : DragEvent) =
       ev.preventDefault()
       let target = (ev.target :?> Fable.Import.Browser.Element)
-      let fieldIndex = int (System.Text.RegularExpressions.Regex.Match(target.id, @"\d+").Value);
-      let subjectId = ev.dataTransfer.getData("text")
+      let fieldIndex = int (Regex.Match(target.id, @"\d+").Value);
+      let draggedItemId = ev.dataTransfer.getData("text")
 
-      let camel = tryParseCamelFromId subjectId
-      match camel with
-      | Some c -> CamelDropped (c, OnField (fieldIndex)) |> dispatch
+      let camelId = tryParseCamelFromId draggedItemId
+      match camelId with
+      | Some camelId -> CamelDropped (camelId, OnField (fieldIndex)) |> dispatch
       | None ->
-        let plateIndex = int (System.Text.RegularExpressions.Regex.Match(subjectId, @"\d+").Value)
-        ExistingPlateDropped (plateIndex, fieldIndex) |> dispatch
+        let isMinusPlate = Regex.IsMatch(draggedItemId, "minus-one-stack")
+        let isPlusPlate = Regex.IsMatch(draggedItemId, "plus-one-stack")
+
+        if isPlusPlate then
+          NewPlateDroppedOnBoard (PlusOne, fieldIndex) |> dispatch
+        else if isMinusPlate then
+          NewPlateDroppedOnBoard (MinusOne, fieldIndex) |> dispatch
+        else
+          let plateIndex = int (Regex.Match(draggedItemId, @"\d+").Value)
+          ExistingPlateDropped (plateIndex, fieldIndex) |> dispatch
 
     let field ((x,y),i) =
         [div
@@ -232,7 +239,7 @@ let boardView model dispatch =
      @ [boardCenterView model.DicesLeft dispatch]
     )
 
-let chancesSummaryView title (model : (Camel * float) list option) =
+let chancesView title (model : (Camel * float) list option) =
   match model with
   | Some chances ->
     div [
@@ -253,11 +260,41 @@ let chancesSummaryView title (model : (Camel * float) list option) =
         ]
   | None -> null
 
+let chancesSummaryView (model : Model) =
+  div [Class "chances-summary"] [
+    chancesView "STAGE(%)" model.StageWinChances
+    chancesView "RACE(%)" model.RaceWinChances
+  ]
+
+let platePanel dispatch =
+  div [Class "plate-panel"] [
+    div [
+       Id "plus-one-stack"
+       Class "plate-stack"
+       Draggable true
+       OnDragStart Draggable.dragStart]
+      [Fable.Helpers.React.HTMLNode.Text ("+1")]
+    div [
+      Id "minus-one-stack"
+      Class "plate-stack"
+      Draggable true
+      OnDragStart Draggable.dragStart]
+      [Fable.Helpers.React.HTMLNode.Text ("-1")]
+    button [
+      OnClick (fun _ -> dispatch RemovePlates)
+    ] [Fable.Helpers.React.HTMLNode.Text ("Remove plates")]
+  ]
+
+let sidePanel model dispatch =
+  div [Class "side-panel"] [
+      chancesSummaryView model
+      platePanel dispatch
+  ]
+
 let root (model : Model) (dispatch : Msg -> unit) =
   div
     [Style [Display "flex"] ]
     [
       boardView model dispatch
-      chancesSummaryView "STAGE(%)" model.StageWinChances
-      chancesSummaryView "RACE(%)" model.RaceWinChances
+      sidePanel model dispatch
     ]

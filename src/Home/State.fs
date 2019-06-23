@@ -111,13 +111,7 @@ let update msg model : Model * Cmd<Msg> =
     match msg with
     | CamelDropped (place, camel) ->
         handleCamelDropped msg model (place, camel)
-    | ExistingPlateDropped(plateIndex, fieldIndex) ->
-        let plate = model.Map.[plateIndex]
-        let newMap =
-          model.Map
-          |> setElement fieldIndex plate
-          |> setElement plateIndex None
-        {model with Map = newMap}, []
+
     | ResetDices ->
          {model with
             DicesLeft = allCamels
@@ -127,8 +121,17 @@ let update msg model : Model * Cmd<Msg> =
          {model with
             DicesLeft = newDicesLeft
          }, createCalculationCmd model.Map newDicesLeft
+
     | RaceWinChancesComputed(chances) -> {model with RaceWinChances = Some chances}, []
     | StageWinChancesComputed(chances) ->  {model with StageWinChances = Some chances}, []
+
+    | ExistingPlateDropped(plateIndex, fieldIndex) ->
+        let plate = model.Map.[plateIndex]
+        let newMap =
+          model.Map
+          |> setElement fieldIndex plate
+          |> setElement plateIndex None
+        {model with Map = newMap}, createCalculationCmd newMap model.DicesLeft
     | FlipPlate (plateIndex) ->
       let plate = model.Map.[plateIndex]
       let newMap =
@@ -138,6 +141,25 @@ let update msg model : Model * Cmd<Msg> =
         | Some (Plate MinusOne) ->
           model.Map |> setElement plateIndex (Some (Plate PlusOne))
         | _ -> failwith "not a plate"
+      {model with Map = newMap}, createCalculationCmd newMap model.DicesLeft
+    | NewPlateDroppedOnBoard(plate, fieldIndex) ->
+      let target = model.Map.[fieldIndex]
+      match target with
+      | (Some (CamelStack s)) -> model, []
+      | _ ->
+        let newMap =
+          match plate with
+          | PlusOne -> model.Map |> setElement fieldIndex (Some (Plate PlusOne))
+          | MinusOne -> model.Map |> setElement fieldIndex (Some (Plate MinusOne))
+        {model with Map = newMap}, createCalculationCmd newMap model.DicesLeft
+    | RemovePlates ->
+      let newMap =
+        model.Map
+        |> Array.map
+          (fun f ->
+            match f with
+            | Some (Plate _) -> None
+            | i -> i)
       {model with Map = newMap}, createCalculationCmd newMap model.DicesLeft
 
     | ComputationError -> failwith "Not Implemented"
