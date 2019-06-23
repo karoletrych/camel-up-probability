@@ -164,7 +164,7 @@ let update msg model : Model * Cmd<Msg> =
 
     | ComputationError -> failwith "Not Implemented"
     | RollDice(dice, count) ->
-      let (newMap, newIndex) = Domain.MoveCamel.applyRoll model.Map {Count = count; Camel = dice}
+      let (newMap, newIndex) = model.Map |> Domain.MoveCamel.applyRoll  {Count = count; Camel = dice}
 
       if newIndex < Domain.Types.Constants.fieldsCount then
         let newDicesLeft = model.DicesLeft |> List.where (fun d -> d <> dice)

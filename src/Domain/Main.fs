@@ -16,7 +16,7 @@ let takeWhilePlusOne predicate (s:seq<_>) =
 let playUntilFinish initialState applyRoll (rollSequence : DiceRoll seq) =
   rollSequence
   |> Seq.scan (fun state inp ->
-       state |> (fun state -> applyRoll (fst state) inp)) (initialState, 0)
+       state |> (fun state -> (fst state) |> applyRoll  inp)) (initialState, 0)
   |> takeWhilePlusOne (fun (_, finalIndex) -> finalIndex < Constants.fieldsCount)
   |> Seq.last |> (fun (result, _) -> result)
 
