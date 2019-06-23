@@ -14967,4 +14967,62 @@ label.panel-block:hover {
   border-color: #202020;
 }
 
+.dices-grid {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+}
+.dices-grid div {
+  flex-grow: 1;
+  flex-direction: column;
+  display: flex;
+}
+.dices-grid div button {
+  cursor: pointer;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+.reset-button {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plate {
+  background-color: gold;
+  position: absolute;
+  border: 2px solid red;
+  cursor: pointer;
+  width: 15%;
+  height: 15%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+}
+
+.plate-stack {
+  background-color: gold;
+  border: 2px solid red;
+  cursor: pointer;
+  width: 15%;
+  height: 15%;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+}
+
+.side-panel {
+  display: flex;
+}
+
+.plate-panel {
+  display: flex;
+}
+
 /*# sourceMappingURL=style.css.map*/
