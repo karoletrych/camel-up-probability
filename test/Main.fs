@@ -11,10 +11,10 @@ let run () =
           let map =
               Array.init mapSize
                 (function
-                | 2 -> CamelStack [Orange; Yellow] |> Some
+                | 2 -> CamelStack [Yellow; Orange;] |> Some
                 | 3 -> Plate PlusOne |> Some
                 | 4 -> CamelStack [Blue] |> Some
-                | 5 -> CamelStack [White; Green] |> Some
+                | 5 -> CamelStack [Green; White;] |> Some
                 | _ -> None)
 
           let (updatedMap, _) = map |> Domain.MoveCamel.applyRoll {Camel = Orange; Count = 3}
@@ -24,7 +24,7 @@ let run () =
                 (function
                 | 3 -> Plate PlusOne |> Some
                 | 4 -> CamelStack [Blue] |> Some
-                | 5 -> CamelStack [White; Green; Orange; Yellow] |> Some
+                | 5 -> CamelStack [Yellow;Orange;Green; White;] |> Some
                 | _ -> None)
 
           assertEqual (Thoth.Json.Encode.Auto.toString(4, updatedMap)) (Thoth.Json.Encode.Auto.toString(4, expectedMap))
@@ -33,10 +33,10 @@ let run () =
           let map =
               Array.init mapSize
                 (function
-                | 2 -> CamelStack [Orange; Yellow] |> Some
+                | 2 -> CamelStack [Yellow; Orange; ] |> Some
                 | 3 -> Plate PlusOne |> Some
                 | 4 -> CamelStack [Blue] |> Some
-                | 5 -> CamelStack [White; Green] |> Some
+                | 5 -> CamelStack [Green; White; ] |> Some
                 | _ -> None)
 
           let (updatedMap, _) = map |> Domain.MoveCamel.applyRoll {Camel = Yellow; Count = 1}
@@ -46,8 +46,8 @@ let run () =
                 (function
                 | 2 -> CamelStack [Orange] |> Some
                 | 3 -> Plate PlusOne |> Some
-                | 4 -> CamelStack [Blue; Yellow] |> Some
-                | 5 -> CamelStack [White; Green] |> Some
+                | 4 -> CamelStack [Yellow; Blue; ] |> Some
+                | 5 -> CamelStack [Green; White; ] |> Some
                 | _ -> None)
 
           assertEqual (Thoth.Json.Encode.Auto.toString(4, updatedMap)) (Thoth.Json.Encode.Auto.toString(4, expectedMap))
@@ -56,10 +56,10 @@ let run () =
           let map =
               Array.init mapSize
                 (function
-                | 2 -> CamelStack [Orange; Yellow;] |> Some
+                | 2 -> CamelStack [Yellow; Orange; ] |> Some
                 | 3 -> Plate PlusOne |> Some
                 | 4 -> CamelStack [] |> Some
-                | 5 -> CamelStack [White; Green; Blue] |> Some
+                | 5 -> CamelStack [Blue; Green; White;  ] |> Some
                 | _ -> None)
 
           let (updatedMap, _) = map |> Domain.MoveCamel.applyRoll {Camel = Yellow; Count = 1}
@@ -70,7 +70,7 @@ let run () =
                 | 2 -> CamelStack [Orange] |> Some
                 | 3 -> Plate PlusOne |> Some
                 | 4 -> CamelStack [Yellow] |> Some
-                | 5 -> CamelStack [White; Green; Blue] |> Some
+                | 5 -> CamelStack [Blue; Green; White;] |> Some
                 | _ -> None)
           assertEqual (Thoth.Json.Encode.Auto.toString(4, updatedMap)) (Thoth.Json.Encode.Auto.toString(4, expectedMap))
 
@@ -78,8 +78,8 @@ let run () =
           let map =
               Array.init mapSize
                 (function
-                | 2 -> CamelStack [Orange; Yellow; White] |> Some
-                | 4 -> CamelStack [Green; Blue] |> Some
+                | 2 -> CamelStack [White; Yellow; Orange;  ] |> Some
+                | 4 -> CamelStack [Blue; Green; ] |> Some
                 | 5 -> Plate MinusOne |> Some
                 | _ -> None)
 
@@ -89,7 +89,7 @@ let run () =
               Array.init mapSize
                 (function
                 | 2 -> CamelStack [Orange] |> Some
-                | 4 -> CamelStack [Yellow; White; Green; Blue] |> Some
+                | 4 -> CamelStack [Blue; Green; White; Yellow;] |> Some
                 | 5 -> Plate MinusOne |> Some
                 | _ -> None)
 
@@ -99,7 +99,7 @@ let run () =
           let map =
               Array.init mapSize
                 (function
-                | 3 -> CamelStack [Orange; Yellow; White; Blue; Green] |> Some
+                | 3 -> CamelStack [Green; Blue; White; Yellow; Orange;] |> Some
                 | 4 -> Plate MinusOne |> Some
                 | _ -> None)
 
@@ -108,7 +108,7 @@ let run () =
           let expectedMap =
               Array.init mapSize
                 (function
-                | 3 -> CamelStack [Orange; Yellow; White; Blue; Green] |> Some
+                | 3 -> CamelStack [Green; Blue; White; Yellow; Orange;] |> Some
                 | 4 -> Plate MinusOne |> Some
                 | _ -> None)
 
