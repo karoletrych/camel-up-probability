@@ -27,7 +27,7 @@ let run () =
                 | 5 -> CamelStack [Yellow;Orange;Green; White;] |> Some
                 | _ -> None)
 
-          assertEqual (Thoth.Json.Encode.Auto.toString(4, updatedMap)) (Thoth.Json.Encode.Auto.toString(4, expectedMap))
+          assertEqual (Thoth.Json.Encode.Auto.toString(4, expectedMap)) (Thoth.Json.Encode.Auto.toString(4, updatedMap))
 
         it "testMoveCamelsOntoPlatePlusOneAdjucentToCamel" <| fun () ->
           let map =
@@ -50,7 +50,7 @@ let run () =
                 | 5 -> CamelStack [Green; White; ] |> Some
                 | _ -> None)
 
-          assertEqual (Thoth.Json.Encode.Auto.toString(4, updatedMap)) (Thoth.Json.Encode.Auto.toString(4, expectedMap))
+          assertEqual (Thoth.Json.Encode.Auto.toString(4, expectedMap)) (Thoth.Json.Encode.Auto.toString(4, updatedMap))
 
         it "testMoveCamelsOntoPlatePlusOneAdjucentToEmptyField" <| fun () ->
           let map =
@@ -72,7 +72,7 @@ let run () =
                 | 4 -> CamelStack [Yellow] |> Some
                 | 5 -> CamelStack [Blue; Green; White;] |> Some
                 | _ -> None)
-          assertEqual (Thoth.Json.Encode.Auto.toString(4, updatedMap)) (Thoth.Json.Encode.Auto.toString(4, expectedMap))
+          assertEqual (Thoth.Json.Encode.Auto.toString(4, expectedMap)) (Thoth.Json.Encode.Auto.toString(4, updatedMap))
 
         it "testMoveCamelsOntoPlateMinusOneAdjucentToCamel" <| fun () ->
           let map =
@@ -93,13 +93,13 @@ let run () =
                 | 5 -> Plate MinusOne |> Some
                 | _ -> None)
 
-          assertEqual (Thoth.Json.Encode.Auto.toString(4, updatedMap)) (Thoth.Json.Encode.Auto.toString(4, expectedMap))
+          assertEqual (Thoth.Json.Encode.Auto.toString(4, expectedMap)) (Thoth.Json.Encode.Auto.toString(4, updatedMap))
 
         it "testMoveCamelsOntoPlateMinusOneAdjucentToEmptyField" <| fun () ->
           let map =
               Array.init mapSize
                 (function
-                | 3 -> CamelStack [Green; Blue; White; Yellow; Orange;] |> Some
+                | 2 -> CamelStack [Green; Blue; White; Yellow; Orange;] |> Some
                 | 4 -> Plate MinusOne |> Some
                 | _ -> None)
 
@@ -112,7 +112,7 @@ let run () =
                 | 4 -> Plate MinusOne |> Some
                 | _ -> None)
 
-          assertEqual (Thoth.Json.Encode.Auto.toString(4, updatedMap)) (Thoth.Json.Encode.Auto.toString(4, expectedMap))
+          assertEqual (Thoth.Json.Encode.Auto.toString(4, expectedMap)) (Thoth.Json.Encode.Auto.toString(4, updatedMap))
 
 
 run ()
