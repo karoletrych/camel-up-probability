@@ -12,8 +12,8 @@ let fieldHeight = 20
 
 let plateMargin = 2 // TODO: remove this crap
 
-let camelHeight = fieldHeight / 5
-let camelWidth = fieldWidth
+let camelHeight = 4
+let camelWidth = 20
 
 let coordsMapping = Map.ofList [
     (0, (4,2));
@@ -221,7 +221,7 @@ let boardCenterView (dicesLeft : Camel list) dispatch =
         ]
 
 let boardView model dispatch =
-  div [ Style [Width "500px"; Height "500px"; CSSProp.Position "relative"]  ]
+  div [ Class "board" ]
     (
       let fieldContents =
         model.Map
@@ -243,19 +243,18 @@ let chancesView title (model : (Camel * float) list option) =
   match model with
   | Some chances ->
     div [
-        Style[MarginLeft "2em"]
     ]
         [
           div
-              [Style [FontSize "1.5em"]]
-              [Fable.Helpers.React.HTMLNode.Text title]
+              []
+              [Text title]
           ul
             []
             (
             chances
               |> List.map (fun (c, f) ->
                 let text = sprintf "%.5g" (100. * f)
-                li [Style [Background (camelColor c); FontSize "1.5em"]; ] [ Fable.Helpers.React.HTMLNode.Text text])
+                li [Style [Background (camelColor c)]; ] [ Fable.Helpers.React.HTMLNode.Text text])
             )
         ]
   | None -> null
@@ -293,7 +292,7 @@ let sidePanel model dispatch =
 
 let root (model : Model) (dispatch : Msg -> unit) =
   div
-    [Style [Display "flex"] ]
+    [Class "root" ]
     [
       boardView model dispatch
       sidePanel model dispatch

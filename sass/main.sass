@@ -51,8 +51,6 @@ $fa-font-path: "./../node_modules/@fortawesome/fontawesome-free/webfonts/"
   background-color: gold
   border: 2px solid red
   cursor: pointer
-  width: 15%
-  height: 15%
   display: flex
   flex: 1
   align-items: center
@@ -62,6 +60,17 @@ $fa-font-path: "./../node_modules/@fortawesome/fontawesome-free/webfonts/"
 
 .side-panel
   display: flex
+  flex-direction: column
 
 .plate-panel
+  display: flex
+  flex-direction: column
+  justify-content: flex-start
+
+.board
+  position: relative
+  width: 400px
+  height: 400px
+
+.root
   display: flex

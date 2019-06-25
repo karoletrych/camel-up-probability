@@ -23,7 +23,7 @@ let navButtons =
         [ ClassName "navbar-item" ]
         [ div
             [ ClassName "field is-grouped" ]
-            [ navButton "github" "https://github.com/elmish/elmish" "fa-github" "GitHub"] ]
+            [ navButton "github" "https://github.com/karoletrych/camel-up-probability" "fa-github" "GitHub"] ]
 
 let root =
     nav
