@@ -30,7 +30,7 @@ self.addEventListener_message(fun ev ->
       | CalculateRaceWinChancesCommand {Map = map; DicesLeft = dicesLeft} -> Domain.Main.raceWinChances map dicesLeft
       | CalculateStageWinChancesCommand {Map = map; DicesLeft = dicesLeft} -> Domain.Main.stageWinChances map dicesLeft
 
-  let responseDto = {ResponseContent= result; Id= message.Id}
+  let responseDto = {ResponseContent= result; Id = message.Id}
   let response = Thoth.Json.Encode.Auto.toString(0, responseDto)
 
   let ports = ev.ports :?> Browser.MessagePort array

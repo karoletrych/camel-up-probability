@@ -82,29 +82,33 @@ let handleCamelDropped msg model (droppedCamel, place) =
         Map = newMap
         }, createCalculationCmd newMap model.DicesLeft
     | OnField fieldIndex ->
-      let newMap =
-        let map = model.Map
-        let (oldStackIndex, oldStack) = map |> findCamelStack droppedCamel
-        let oldStackUpdated =
-          oldStack
-          |> List.where (fun c -> c <> droppedCamel)
-          |> CamelStack |> Some
-        let newField = map.[fieldIndex]
-        let newFieldUpdated =
-          match newField with
-          | Some (CamelStack s) -> CamelStack (droppedCamel :: (s |> List.where (fun c -> c <> droppedCamel)))
-          | None -> CamelStack [droppedCamel]
-          |> Some
-
+      let newField = model.Map.[fieldIndex]
+      match newField with
+      | Some (Plate _) -> model, []
+      | _ ->
         let newMap =
-          map
-          |> setElement oldStackIndex oldStackUpdated
-          |> setElement fieldIndex newFieldUpdated
-        newMap
+          let map = model.Map
+          let (oldStackIndex, oldStack) = map |> findCamelStack droppedCamel
+          let oldStackUpdated =
+            oldStack
+            |> List.where (fun c -> c <> droppedCamel)
+            |> CamelStack |> Some
+          let newFieldUpdated =
+            match newField with
+            | Some (CamelStack s) -> CamelStack (droppedCamel :: (s |> List.where (fun c -> c <> droppedCamel)))
+            | None -> CamelStack [droppedCamel]
+            | Some (Plate _) -> failwith "already handled"
+            |> Some
 
-      {model with
-          Map = newMap
-      }, createCalculationCmd newMap model.DicesLeft
+          let newMap =
+            map
+            |> setElement oldStackIndex oldStackUpdated
+            |> setElement fieldIndex newFieldUpdated
+          newMap
+
+        {model with
+            Map = newMap
+        }, createCalculationCmd newMap model.DicesLeft
 
 
 let update msg model : Model * Cmd<Msg> =

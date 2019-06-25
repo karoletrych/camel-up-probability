@@ -20,14 +20,16 @@ let playUntilFinish initialState applyRoll (rollSequence : DiceRoll seq) =
   |> takeWhilePlusOne (fun (_, finalIndex) -> finalIndex < Constants.fieldsCount)
   |> Seq.last |> (fun (result, _) -> result)
 
-let winner (map : Map) : Camel =
-    let (Some (CamelStack lastNonEmptyStack)) =
+let winner (map : Map) g : Camel =
+    let lastNonEmptyStack =
         map
-        |> Array.findBack (
+        |> Array.rev
+        |> Array.choose (
             function
-            | Some (CamelStack []) -> false
-            | Some (CamelStack _) -> true
-            | _ -> false)
+            | Some (CamelStack []) -> None
+            | Some (CamelStack s) -> Some s
+            | _ -> None)
+        |> Array.head
     lastNonEmptyStack |> List.head
 
 
@@ -39,8 +41,8 @@ let winnerPercentages totalGames =
 
 let winnerCounts rolls map =
     rolls
-    |> Seq.map (fun game -> playUntilFinish map MoveCamel.applyRoll game)
-    |> Seq.map winner
+    |> Seq.map (fun game -> game, playUntilFinish map MoveCamel.applyRoll game)
+    |> Seq.map (fun (g, m) -> winner m g)
     |> Seq.countBy id
     |> Seq.toList
 

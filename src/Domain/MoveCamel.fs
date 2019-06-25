@@ -7,14 +7,15 @@ let applyRoll (roll : DiceRoll) (map : Map) : (Map * int) =
     // printfn "map: %A" map
     // printfn "roll: %A" roll
 
-    let (camelMapIndex, Some (CamelStack camelStack)) =
+    let (camelMapIndex, camelStack) =
       map
       |> Array.indexed
-      |> Array.find (
+      |> Array.choose (
           function
-          | (_, Some (CamelStack s)) -> s |> List.contains camel
-          | _ -> false
+          | (i, Some (CamelStack s)) when  s |> List.contains camel -> Some (i,s)
+          | _ -> None
       )
+      |> Array.head
 
     let camelStackIndex = camelStack |> List.findIndex ((=) camel)
 
@@ -43,38 +44,36 @@ let applyRoll (roll : DiceRoll) (map : Map) : (Map * int) =
 
     // printfn "new field: %A" newField
 
-    let map =
-      match map.[newCamelMapIndex] with
-      | Some (Plate p) ->
-        match p with
-        | PlusOne ->
-          match map.[newCamelMapIndex + 1] with
-          | Some (CamelStack camels) ->
-            let newCamelStack =  camelsToMove @ camels
-            mapWithRemovedCamels
-            |> setElement (newCamelMapIndex + 1) (Some (CamelStack newCamelStack))
-          | None ->
-            mapWithRemovedCamels
-            |> setElement (newCamelMapIndex + 1) (Some (CamelStack camelsToMove))
-          | _ -> failwith "two plates next to each other"
-        | MinusOne ->
-          match map.[newCamelMapIndex - 1] with
-          | Some (CamelStack camels) ->
-            let newCamelStack =  camels @ camelsToMove
-            mapWithRemovedCamels
-            |> setElement (newCamelMapIndex - 1) (Some (CamelStack newCamelStack))
-          | None ->
-            mapWithRemovedCamels
-            |> setElement (newCamelMapIndex - 1) (Some (CamelStack camelsToMove))
-          | _ -> failwith "two plates next to each other"
-
-      | Some (CamelStack camels) ->
+    match map.[newCamelMapIndex] with
+    | Some (Plate p) ->
+      match p with
+      | PlusOne ->
+        match map.[newCamelMapIndex + 1] with
+        | Some (CamelStack camels) ->
           let newCamelStack =  camelsToMove @ camels
           mapWithRemovedCamels
-          |> setElement newCamelMapIndex (Some (CamelStack newCamelStack))
-      | None ->
+          |> setElement (newCamelMapIndex + 1) (Some (CamelStack newCamelStack)), (newCamelMapIndex + 1)
+        | None ->
           mapWithRemovedCamels
-          |> setElement newCamelMapIndex (Some (CamelStack camelsToMove))
+          |> setElement (newCamelMapIndex + 1) (Some (CamelStack camelsToMove)), (newCamelMapIndex + 1)
+        | _ -> failwith "two plates next to each other"
+      | MinusOne ->
+        match map.[newCamelMapIndex - 1] with
+        | Some (CamelStack camels) ->
+          let newCamelStack =  camels @ camelsToMove
+          mapWithRemovedCamels
+          |> setElement (newCamelMapIndex - 1) (Some (CamelStack newCamelStack)), (newCamelMapIndex - 1)
+        | None ->
+          mapWithRemovedCamels
+          |> setElement (newCamelMapIndex - 1) (Some (CamelStack camelsToMove)), (newCamelMapIndex - 1)
+        | _ -> failwith "two plates next to each other"
+
+    | Some (CamelStack camels) ->
+        let newCamelStack =  camelsToMove @ camels
+        mapWithRemovedCamels
+        |> setElement newCamelMapIndex (Some (CamelStack newCamelStack)), newCamelMapIndex
+    | None ->
+        mapWithRemovedCamels
+        |> setElement newCamelMapIndex (Some (CamelStack camelsToMove)), newCamelMapIndex
     // printfn "map at end: %A" map
     // printfn ""
-    (map, camelMapIndex)

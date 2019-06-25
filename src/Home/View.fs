@@ -244,7 +244,7 @@ let chancesView title (model : (Camel * float) list option) =
     ]
         [
           div
-              []
+              [Class "chances-header"]
               [Text title]
           ul
             []
