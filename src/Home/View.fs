@@ -81,15 +81,13 @@ let camelStackView dispatch (camels : Camel list) fieldIndex =
         [div
               [
                 Id (sprintf "camel-%s" (camel.ToString().ToLower() ))
+                Class "camel"
                 Style [
                     Width (sprintf "%d%%"(camelWidth))
                     Height (sprintf "%d%%"(camelHeight))
                     Left (sprintf "%d%%"(x * fieldWidth))
                     Top (sprintf "%d%%"((y+1) * fieldHeight - (camelIndex + 1) * camelHeight))
                     BackgroundColor (camelColor camel)
-                    CSSProp.Position "absolute"
-                    Border "1px solid black"
-                    Cursor "pointer"
                     ]
                 Draggable true
                 OnDragStart Draggable.dragStart
