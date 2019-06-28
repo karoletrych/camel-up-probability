@@ -113,6 +113,24 @@ let run () =
                 | _ -> None)
 
           assertEqual (Thoth.Json.Encode.Auto.toString(4, expectedMap)) (Thoth.Json.Encode.Auto.toString(4, updatedMap))
+        it "testMoveCamelsOntoPlateMinusOneAdjucentToCamel" <| fun () ->
+          let map =
+              Array.init mapSize
+                (function
+                | 3 -> CamelStack [Green; Blue; White; Yellow; Orange;] |> Some
+                | 4 -> Plate MinusOne |> Some
+                | _ -> None)
+
+          let (updatedMap, _) = map |> Domain.MoveCamel.applyRoll {Camel = White; Count = 1}
+
+          let expectedMap =
+              Array.init mapSize
+                (function
+                | 3 -> CamelStack [Yellow; Orange; Green; Blue; White;] |> Some
+                | 4 -> Plate MinusOne |> Some
+                | _ -> None)
+
+          assertEqual (Thoth.Json.Encode.Auto.toString(4, expectedMap)) (Thoth.Json.Encode.Auto.toString(4, updatedMap))
 
 
 run ()

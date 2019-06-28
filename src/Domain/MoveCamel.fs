@@ -37,8 +37,7 @@ let applyRoll (roll : DiceRoll) (map : Map) : (Map * int) =
 
     let mapWithRemovedCamels =
                map
-               |> setElement camelMapIndex
-                    fieldToLeave
+               |> setElement camelMapIndex fieldToLeave
 
     // printfn "map: %A" mapWithRemovedCamels
 
@@ -48,30 +47,27 @@ let applyRoll (roll : DiceRoll) (map : Map) : (Map * int) =
     | Some (Plate p) ->
       match p with
       | PlusOne ->
-        match map.[newCamelMapIndex + 1] with
+        match mapWithRemovedCamels.[newCamelMapIndex + 1] with
         | Some (CamelStack camels) ->
-          let newCamelStack =  camelsToMove @ camels
           mapWithRemovedCamels
-          |> setElement (newCamelMapIndex + 1) (Some (CamelStack newCamelStack)), (newCamelMapIndex + 1)
+          |> setElement (newCamelMapIndex + 1) (Some (CamelStack (camelsToMove @ camels))), (newCamelMapIndex + 1)
         | None ->
           mapWithRemovedCamels
           |> setElement (newCamelMapIndex + 1) (Some (CamelStack camelsToMove)), (newCamelMapIndex + 1)
         | _ -> failwith "two plates next to each other"
       | MinusOne ->
-        match map.[newCamelMapIndex - 1] with
+        match mapWithRemovedCamels.[newCamelMapIndex - 1] with
         | Some (CamelStack camels) ->
-          let newCamelStack =  camels @ camelsToMove
           mapWithRemovedCamels
-          |> setElement (newCamelMapIndex - 1) (Some (CamelStack newCamelStack)), (newCamelMapIndex - 1)
+          |> setElement (newCamelMapIndex - 1) (Some (CamelStack (camels @ camelsToMove))), (newCamelMapIndex - 1)
         | None ->
           mapWithRemovedCamels
           |> setElement (newCamelMapIndex - 1) (Some (CamelStack camelsToMove)), (newCamelMapIndex - 1)
         | _ -> failwith "two plates next to each other"
 
     | Some (CamelStack camels) ->
-        let newCamelStack =  camelsToMove @ camels
         mapWithRemovedCamels
-        |> setElement newCamelMapIndex (Some (CamelStack newCamelStack)), newCamelMapIndex
+        |> setElement newCamelMapIndex (Some (CamelStack (camelsToMove @ camels))), newCamelMapIndex
     | None ->
         mapWithRemovedCamels
         |> setElement newCamelMapIndex (Some (CamelStack camelsToMove)), newCamelMapIndex
